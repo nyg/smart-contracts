@@ -125,7 +125,12 @@ contract MultiSignatureWallet {
         address destination,
         uint256 value,
         bytes calldata payload
-    ) external notNull(destination) senderIsAnOwner() returns (uint256 transactionId) {
+    )
+        external
+        notNull(destination)
+        senderIsAnOwner()
+        returns (uint256 transactionId)
+    {
         // store the submitted transaction
         transactionId = addTransaction(destination, value, payload);
 
