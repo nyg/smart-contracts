@@ -1,0 +1,9 @@
+{
+  "name": "multisig-wallet",
+  "version": "1.0.0",
+  "main": "truffle-config.js",
+  "license": "ISC",
+  "devDependencies": {
+    "truffle": "5.3.3"
+  }
+}
