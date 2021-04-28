@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.4;
 
-/// @notice This contract allows a set of owners (defined during initialization) to submit, approve and/or revoke
-///         transactions. A transaction is then executed if it has been confirmed by a quorum of owners (also set during
-///         initialization of the contract).
+/// @notice This contract allows a set of owners (defined during initialization) to submit, confirm and/or revoke
+/// transactions. A transaction is then executed if it has been confirmed by a quorum of owners (also set during the
+/// initialization of the contract).
 contract MultiSignatureWallet {
-    /* Structures */
+    /*
+     * Structures
+     */
 
-    /// @notice A transaction to be submitted, confirmed and/or rejected
-    /// @param destination Destination of the transaction, i.e. EOA or contract account
-    /// @param value Amount of Ether to be sent
-    /// @param payload Payload of the transaction
-    /// @param executed Flag indicating if the transaction has been executed or not
+    /// @notice A transaction to be submitted, confirmed and/or rejected.
+    /// @param destination The destination of the transaction, i.e. EOA or contract account.
+    /// @param value The amount of Ether to be sent.
+    /// @param payload A payload of the transaction.
+    /// @param executed A flag indicating if the transaction has been executed or not.
     struct Transaction {
         address destination;
         uint256 value;
@@ -19,27 +21,31 @@ contract MultiSignatureWallet {
         bool executed;
     }
 
-    /* State variables */
+    /*
+     * State variables
+     */
 
-    /// @notice Owners of the wallet, defined during the initialization of the contract
+    /// @notice The list of wallet owners.
     address[] public owners;
 
-    /// @dev Easier than looping the array to know who's an owner
+    /// @dev Easier than looping the array to know who's an owner.
     mapping(address => bool) public isOwner;
 
-    /// @notice The quorum of owners needed to execute a transaction
+    /// @notice The quorum of owners needed to execute a transaction.
     uint256 public quorum;
 
-    /// @notice A mapping of transaction ids to transactions
+    /// @notice A mapping of transaction ids to transactions.
     mapping(uint256 => Transaction) public transactions;
 
-    /// @notice The number of transactions that have been submitted to the contract
+    /// @notice The number of transactions that have been submitted to the contract.
     uint256 public transactionCount;
 
-    /// @notice For each transaction, a mapping of addresses approving or not the transaction
+    /// @notice For each transaction, a mapping of owners approving or not the transaction.
     mapping(uint256 => mapping(address => bool)) public confirmations;
 
-    /* Events */
+    /*
+     * Events
+     */
 
     /// @notice Indicates an owner has submitted a new transaction.
     event Submission(uint256 indexed transactionId);
@@ -59,7 +65,9 @@ contract MultiSignatureWallet {
     /// @notice Indicates a deposit of Ether has been made to the contract.
     event Deposit(address indexed sender, uint256 value);
 
-    /* Function modifiers */
+    /*
+     * Function modifiers
+     */
 
     modifier notNull(address _address) {
         require(_address != address(0));
@@ -71,13 +79,13 @@ contract MultiSignatureWallet {
         _;
     }
 
-    modifier senderHasConfirmed(uint256 _id) {
-        require(confirmations[_id][msg.sender] == true);
+    modifier senderHasConfirmed(uint256 _transactionId) {
+        require(confirmations[_transactionId][msg.sender] == true);
         _;
     }
 
-    modifier senderHasNotConfirmed(uint256 _id) {
-        require(confirmations[_id][msg.sender] == false);
+    modifier senderHasNotConfirmed(uint256 _transactionId) {
+        require(confirmations[_transactionId][msg.sender] == false);
         _;
     }
 
@@ -86,18 +94,20 @@ contract MultiSignatureWallet {
         _;
     }
 
-    modifier notExecuted(uint256 _id) {
-        require(transactions[_id].executed == false);
+    modifier notExecuted(uint256 _transactionId) {
+        require(transactions[_transactionId].executed == false);
         _;
     }
 
-    /* Constructors */
+    /*
+     * Constructors
+     */
 
-    /// @notice Initializes the contract with the given list of owners and a quorum value.
-    /// @param _owners List of initial owners.
+    /// @notice Initializes the contract with the given list of owners and quorum.
+    /// @param _owners The list of wallet owners.
     /// @param _qorum Quorum of owners for a transaction to be executed.
     constructor(address[] memory _owners, uint256 _qorum) {
-        require(_qorum == 0 && _owners.length == 0 && _qorum > _owners.length);
+        require(_qorum != 0 && _owners.length != 0 && _qorum < _owners.length);
 
         owners = _owners;
         quorum = _qorum;
@@ -107,13 +117,13 @@ contract MultiSignatureWallet {
         }
     }
 
-    /* Functions */
+    /*
+     * Functions
+     */
 
     /// @notice Emits a Deposit event when the contract receives Ether.
     receive() external payable {
-        if (msg.value > 0) {
-            emit Deposit(msg.sender, msg.value);
-        }
+        emit Deposit(msg.sender, msg.value);
     }
 
     /// @notice Allows an owner to submit and confirm a transaction.
@@ -139,7 +149,7 @@ contract MultiSignatureWallet {
     }
 
     /// @notice Allows an owner to revoke a confirmation for a previously confirmed transaction.
-    /// @param transactionId The id of the transaction to be revoked.
+    /// @param transactionId IThe id of the transaction to be revoked.
     function revokeConfirmation(uint256 transactionId)
         external
         transactionExists(transactionId)
@@ -159,11 +169,11 @@ contract MultiSignatureWallet {
         senderIsAnOwner()
         senderHasNotConfirmed(transactionId)
     {
-        // sender confirms transaction
+        // confirm transaction
         confirmations[transactionId][msg.sender] = true;
         emit Confirmation(msg.sender, transactionId);
 
-        // attempt execution
+        // attempt its execution
         executeTransaction(transactionId);
     }
 
