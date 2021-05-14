@@ -1,0 +1,15 @@
+{
+  "name": "proof-of-existence",
+  "version": "1.0.0",
+  "main": "truffle-config.js",
+  "license": "ISC",
+  "scripts": {
+    "clean": "rm -rf build/"
+  },
+  "dependencies": {
+    "@truffle/hdwallet-provider": "1.4.0"
+  },
+  "devDependencies": {
+    "truffle": "5.3.3"
+  }
+}
