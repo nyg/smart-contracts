@@ -1,7 +1,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 const fs = require('fs')
 
-const [mnemonic, infuraKey] = fs.readFileSync('.secret').toString().split('\n')
+const [mnemonic, infuraKey] = fs.readFileSync('../.secret').toString().split('\n')
 const infuraURL = `https://ropsten.infura.io/v3/${infuraKey}`
 
 module.exports = {
