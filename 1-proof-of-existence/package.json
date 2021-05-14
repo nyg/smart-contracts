@@ -10,6 +10,7 @@
     "@truffle/hdwallet-provider": "1.4.0"
   },
   "devDependencies": {
+    "solhint": "3.3.4",
     "truffle": "5.3.3"
   }
 }
