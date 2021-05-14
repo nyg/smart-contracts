@@ -1,7 +1,7 @@
-var MultiSig = artifacts.require('MultiSignatureWallet')
-var SimpleStorage = artifacts.require('SimpleStorage')
+const MultiSig = artifacts.require('MultiSignatureWallet')
+const SimpleStorage = artifacts.require('SimpleStorage')
 
-module.exports = function(deployer, _, accounts) {
+module.exports = function (deployer, _, accounts) {
 
     const owners = [accounts[0], accounts[1], accounts[2]]
     const quorum = Math.floor(owners.length / 2) + 1 // example
