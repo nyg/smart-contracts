@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "truffle-config.js",
   "license": "ISC",
+  "scripts": {
+    "clean": "rm -rf build/"
+  },
   "devDependencies": {
     "truffle": "5.3.3"
   }
