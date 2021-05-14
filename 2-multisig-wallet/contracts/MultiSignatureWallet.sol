@@ -2,8 +2,8 @@
 pragma solidity 0.8.4;
 
 /// @notice This contract allows a set of owners (defined during initialization) to submit, confirm and/or revoke
-/// transactions. A transaction is then executed if it has been confirmed by a quorum of owners (also set during the
-/// initialization of the contract).
+/// transactions. A transaction is then executed if and only if it has been confirmed by a quorum of owners (also set
+/// during the initialization of the contract).
 contract MultiSignatureWallet {
     /*
      * Structures
@@ -202,7 +202,7 @@ contract MultiSignatureWallet {
     /// @notice Checks if the given transaction has reach the quorum.
     /// @param transactionId The id of the transaction to be checked.
     /// @return Returns true if the quorum has been reached, false otherwise.
-    function hasQuorum(uint256 transactionId) internal view returns (bool) {
+    function hasQuorum(uint256 transactionId) private view returns (bool) {
         uint256 confirmationCount;
         for (uint256 i = 0; i < owners.length; i++) {
             if (confirmations[transactionId][owners[i]]) {
@@ -225,7 +225,7 @@ contract MultiSignatureWallet {
         address destination,
         uint256 value,
         bytes memory payload
-    ) internal returns (uint256 transactionId) {
+    ) private returns (uint256 transactionId) {
         // get next transaction id
         transactionId = transactionCount;
 
