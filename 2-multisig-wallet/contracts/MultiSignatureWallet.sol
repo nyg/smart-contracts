@@ -28,7 +28,7 @@ contract MultiSignatureWallet {
     /// @notice The list of wallet owners.
     address[] public owners;
 
-    /// @dev Easier than looping the array to know who's an owner.
+    /// @dev Cheaper than looping the array to know who's an owner.
     mapping(address => bool) public isOwner;
 
     /// @notice The quorum of owners needed to execute a transaction.
@@ -70,32 +70,41 @@ contract MultiSignatureWallet {
      */
 
     modifier notNull(address _address) {
-        require(_address != address(0));
+        require(_address != address(0), "Address must not be null");
         _;
     }
 
     modifier senderIsAnOwner() {
-        require(isOwner[msg.sender]);
+        require(isOwner[msg.sender], "Sender must be an owner");
         _;
     }
 
     modifier senderHasConfirmed(uint256 _transactionId) {
-        require(confirmations[_transactionId][msg.sender] == true);
+        require(
+            confirmations[_transactionId][msg.sender] == true,
+            "Sender must have confirmed the transaction"
+        );
         _;
     }
 
     modifier senderHasNotConfirmed(uint256 _transactionId) {
-        require(confirmations[_transactionId][msg.sender] == false);
+        require(
+            confirmations[_transactionId][msg.sender] == false,
+            "Sender must not have confirmed the transaction"
+        );
         _;
     }
 
     modifier transactionExists(uint256 _transactionId) {
-        require(_transactionId < transactionCount);
+        require(_transactionId < transactionCount, "Transaction must exists");
         _;
     }
 
     modifier notExecuted(uint256 _transactionId) {
-        require(transactions[_transactionId].executed == false);
+        require(
+            transactions[_transactionId].executed == false,
+            "Transaction must not have been executed"
+        );
         _;
     }
 
@@ -107,7 +116,10 @@ contract MultiSignatureWallet {
     /// @param _owners The list of wallet owners.
     /// @param _qorum Quorum of owners for a transaction to be executed.
     constructor(address[] memory _owners, uint256 _qorum) {
-        require(_qorum != 0 && _owners.length != 0 && _qorum < _owners.length);
+        require(
+            _qorum != 0 && _owners.length != 0 && _qorum < _owners.length,
+            "Quorum and number of owners must be greater than 0"
+        );
 
         owners = _owners;
         quorum = _qorum;
@@ -185,7 +197,7 @@ contract MultiSignatureWallet {
         transactionExists(transactionId)
     {
         if (!hasQuorum(transactionId)) {
-            revert();
+            return;
         }
 
         Transaction storage t = transactions[transactionId];
@@ -224,7 +236,7 @@ contract MultiSignatureWallet {
     function addTransaction(
         address destination,
         uint256 value,
-        bytes memory payload
+        bytes calldata payload
     ) private returns (uint256 transactionId) {
         // get next transaction id
         transactionId = transactionCount;
