@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: ISC
 pragma solidity 0.8.4;
 
 /// @notice This contract allows a set of owners (defined during initialization) to submit, confirm and/or revoke
