@@ -1,21 +1,27 @@
 // SPDX-License-Identifier: ISC
 pragma solidity 0.8.4;
 
-/// @notice This contract allows a set of owners (defined during initialization) to submit, confirm and/or revoke
+/// @notice This contract allows a set of owners (defined during initialization) to submit, confirm and revoke
 /// transactions. A transaction is then executed if and only if it has been confirmed by a quorum of owners (also set
 /// during the initialization of the contract).
+///
+/// TODO
+/// - use Solidity custom errors
+/// - check cost of transaction if sent to an EOA vs contract account
+/// - return confirmationCount in quorumObtainedFor
 contract MultiSignatureWallet {
+
     /*
      * Structures
      */
 
-    /// @notice A transaction to be submitted, confirmed and/or rejected.
+    /// @notice A transaction to be submitted, confirmed and revoked.
     /// @param destination The destination of the transaction, i.e. EOA or contract account.
     /// @param value The amount of Ether to be sent.
-    /// @param payload A payload of the transaction.
+    /// @param payload The calldata of the transaction.
     /// @param executed A flag indicating if the transaction has been executed or not.
     struct Transaction {
-        address destination;
+        address payable destination;
         uint256 value;
         bytes payload;
         bool executed;
@@ -47,22 +53,40 @@ contract MultiSignatureWallet {
      * Events
      */
 
-    /// @notice Indicates an owner has submitted a new transaction.
-    event Submission(uint256 indexed transactionId);
+    /// @notice An owner has submitted a new transaction.
+    event Submitted(uint256 indexed transactionId);
 
-    /// @notice Indicates an owner has confirmed an existing transaction.
-    event Confirmation(address indexed sender, uint256 indexed transactionId);
+    /// @notice An owner has confirmed an existing transaction.
+    event Confirmed(address indexed sender, uint256 indexed transactionId);
 
-    /// @notice Indicates an owner has revoked a transaction he had previously confirmed.
-    event Revocation(address indexed sender, uint256 indexed transactionId);
+    /// @notice An owner has revoked a transaction he had previously confirmed.
+    event Revoked(address indexed sender, uint256 indexed transactionId);
 
-    /// @notice Indicates the quorum has been obtained and the transaction has been successfully executed.
-    event Execution(uint256 indexed transactionId);
+    /// @notice The transaction was not executed because the quorum was not obtained.
+    event QuorumNotObtained(uint256 indexed transactionId);
 
-    /// @notice Indicates the quorum has been obtained but the transaction's execution has failed.
-    event ExecutionFailure(uint256 indexed transactionId);
+    /// @notice The transaction was not executed because the contract's balance is insufficient.
+    event NotEnoughBalance(uint256 indexed transactionId);
 
-    /// @notice Indicates a deposit of Ether has been made to the contract.
+    /// @notice The quorum has been obtained and the contract has enough balance but the transaction's execution has
+    /// failed. Keep in mind the following:
+    /// - if destination is an EOA:
+    ///   - the payload is ignored and the value can be 0
+    /// - if destination is a contract account:
+    ///   - if value > 0 and payload is empty:   contract must have a receive Ether function or a payable fallback
+    ///                                          function, if both then receive() will be executed
+    ///   - if value > 0 and payload is invalid: contract must have a payable fallback function
+    ///   - if value > 0 and payload is valid:   contract function that will be executed must be payable
+    ///   - if value = 0 and payload is empty:   contract must have a receive Ether or a fallback function (need not be
+    ///                                          payable)
+    ///   - if value = 0 and payload is invalid: contract must have a fallback function (need not be payable)
+    ///   - if value = 0 and payload is valid:   contract function that will be executed need not be payable
+    event ExecutionFailed(uint256 indexed transactionId);
+
+    /// @notice The transaction has been successfully executed.
+    event Executed(uint256 indexed transactionId);
+
+    /// @notice The contract has received Ether.
     event Deposit(address indexed sender, uint256 value);
 
     /*
@@ -96,7 +120,7 @@ contract MultiSignatureWallet {
     }
 
     modifier transactionExists(uint256 _transactionId) {
-        require(_transactionId < transactionCount, "Transaction must exists");
+        require(_transactionId < transactionCount, "Transaction must exist");
         _;
     }
 
@@ -114,15 +138,15 @@ contract MultiSignatureWallet {
 
     /// @notice Initializes the contract with the given list of owners and quorum.
     /// @param _owners The list of wallet owners.
-    /// @param _qorum Quorum of owners for a transaction to be executed.
-    constructor(address[] memory _owners, uint256 _qorum) {
+    /// @param _quorum Quorum of owners for a transaction to be executed.
+    constructor(address[] memory _owners, uint256 _quorum) {
         require(
-            _qorum != 0 && _owners.length != 0 && _qorum < _owners.length,
+            _quorum != 0 && _owners.length != 0 && _quorum < _owners.length,
             "Quorum and number of owners must be greater than 0"
         );
 
         owners = _owners;
-        quorum = _qorum;
+        quorum = _quorum;
 
         for (uint256 i = 0; i < _owners.length; i++) {
             isOwner[_owners[i]] = true;
@@ -133,18 +157,20 @@ contract MultiSignatureWallet {
      * Functions
      */
 
-    /// @notice Emits a Deposit event when the contract receives Ether.
+    /// @notice Allows the contract to receive Ether and emit an event when it does.
     receive() external payable {
-        emit Deposit(msg.sender, msg.value);
+        if (msg.value > 0) {
+            emit Deposit(msg.sender, msg.value);
+        }
     }
 
-    /// @notice Allows an owner to submit and confirm a transaction.
-    /// @param destination The address to which the transaction will be sent to.
+    /// @notice Allows an owner to submit a transaction. The transaction will be automatically confirmed.
+    /// @param destination The address to which the transaction will be sent.
     /// @param value The amount of Ether to be sent with the transaction.
-    /// @param payload The payload of the transaction.
+    /// @param payload The payload of the transaction (calldata).
     /// @return transactionId Returns the transaction id.
     function submitTransaction(
-        address destination,
+        address payable destination,
         uint256 value,
         bytes calldata payload
     )
@@ -154,14 +180,14 @@ contract MultiSignatureWallet {
         returns (uint256 transactionId)
     {
         // store the submitted transaction
-        transactionId = addTransaction(destination, value, payload);
+        transactionId = storeTransaction(destination, value, payload);
 
         // the sender also confirms it
         confirmTransaction(transactionId);
     }
 
     /// @notice Allows an owner to revoke a confirmation for a previously confirmed transaction.
-    /// @param transactionId IThe id of the transaction to be revoked.
+    /// @param transactionId The id of the transaction to be revoked.
     function revokeConfirmation(uint256 transactionId)
         external
         transactionExists(transactionId)
@@ -170,7 +196,7 @@ contract MultiSignatureWallet {
     {
         // sender revokes his previous confirmation
         confirmations[transactionId][msg.sender] = false;
-        emit Revocation(msg.sender, transactionId);
+        emit Revoked(msg.sender, transactionId);
     }
 
     /// @notice Allows an owner to confirm a transaction.
@@ -183,7 +209,7 @@ contract MultiSignatureWallet {
     {
         // confirm transaction
         confirmations[transactionId][msg.sender] = true;
-        emit Confirmation(msg.sender, transactionId);
+        emit Confirmed(msg.sender, transactionId);
 
         // attempt its execution
         executeTransaction(transactionId);
@@ -193,28 +219,33 @@ contract MultiSignatureWallet {
     /// @param transactionId The id of the transaction to be executed.
     function executeTransaction(uint256 transactionId)
         public
-        notExecuted(transactionId)
         transactionExists(transactionId)
+        notExecuted(transactionId)
     {
-        if (!hasQuorum(transactionId)) {
+        if (!quorumObtainedFor(transactionId)) {
+            emit QuorumNotObtained(transactionId);
             return;
         }
 
         Transaction storage t = transactions[transactionId];
-        (bool success, ) = t.destination.call{value: t.value}(t.payload);
+        if (address(this).balance < t.value) {
+            emit NotEnoughBalance(transactionId);
+            return;
+        }
 
+        (bool success, ) = t.destination.call{value: t.value}(t.payload);
         if (success) {
             t.executed = true;
-            emit Execution(transactionId);
+            emit Executed(transactionId);
         } else {
-            emit ExecutionFailure(transactionId);
+            emit ExecutionFailed(transactionId);
         }
     }
 
-    /// @notice Checks if the given transaction has reach the quorum.
+    /// @notice Checks if the quorum has been obtained for a given transaction.
     /// @param transactionId The id of the transaction to be checked.
-    /// @return Returns true if the quorum has been reached, false otherwise.
-    function hasQuorum(uint256 transactionId) private view returns (bool) {
+    /// @return Returns true if the quorum has been obtained, false otherwise.
+    function quorumObtainedFor(uint256 transactionId) private view returns (bool) {
         uint256 confirmationCount;
         for (uint256 i = 0; i < owners.length; i++) {
             if (confirmations[transactionId][owners[i]]) {
@@ -228,13 +259,13 @@ contract MultiSignatureWallet {
         return false;
     }
 
-    /// @notice Adds a new transaction to the contract.
+    /// @notice Stores a new transaction to the contract's state.
     /// @param destination The destination address of the transaction.
     /// @param value The amount of Ether to be sent.
     /// @param payload The payload of the transaction.
     /// @return transactionId Returns the transaction id of the new transaction.
-    function addTransaction(
-        address destination,
+    function storeTransaction(
+        address payable destination,
         uint256 value,
         bytes calldata payload
     ) private returns (uint256 transactionId) {
@@ -250,6 +281,6 @@ contract MultiSignatureWallet {
         });
 
         transactionCount++;
-        emit Submission(transactionId);
+        emit Submitted(transactionId);
     }
 }
