@@ -23,7 +23,7 @@ contract('ProofOfExistence', accounts => {
     assert.isTrue(await instance.wasNotarized(document))
   })
 
-  it('should not notarize an already document', async () => {
+  it('should not notarize an already notarized document', async () => {
     await instance.notarize(document)
     await expectRevert.unspecified(
       instance.notarize(document))

@@ -6,11 +6,9 @@
   "scripts": {
     "clean": "rm -rf build/"
   },
-  "dependencies": {
-    "@truffle/hdwallet-provider": "1.4.0"
-  },
   "devDependencies": {
     "@openzeppelin/test-helpers": "0.5.11",
+    "@truffle/hdwallet-provider": "1.4.0",
     "solhint": "3.3.4",
     "truffle": "5.3.6"
   }
