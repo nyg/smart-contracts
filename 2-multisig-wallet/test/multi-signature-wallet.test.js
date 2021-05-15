@@ -9,7 +9,6 @@ contract('MultiSignatureWallet', accounts => {
   const CONFIRMED = 'Confirmed'
   const REVOKED = 'Revoked'
   const EXECUTED = 'Executed'
-  const EXECUTION_FAILED = 'ExecutionFailed'
   const QUORUM_NOT_OBTAINED = 'QuorumNotObtained'
   const NOT_ENOUGH_BALANCE = 'NotEnoughBalance'
   const DEPOSIT = 'Deposit'
