@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: ISC
 pragma solidity 0.8.4;
 
+/// @notice This contract is only here to test the functionalities developped in MultiSignatureWallet.
 contract SimpleStorage {
 
     /// @notice Simple storage variable to hold some data.

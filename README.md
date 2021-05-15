@@ -8,6 +8,8 @@ Based on [blog.openzeppelin.com/the-hitchhikers-guide-to-smart-contracts-in-ethe
 
 ## Multisig Wallet
 
-This smart contract allows for a set of owners (defined during the contract's initialization) to submit, confirm and revoke transactions. Once a transaction has been confirmed by enough owners (the quorum is also defined during the initialization), it is executed.
+This contract allows a set of owners (defined during the contract's initialization) to submit, confirm and revoke transactions. A transaction is then executed if and only if it has been confirmed by a quorum of owners (also set during the initialization).
+
+It is possible to send a transaction either to an EOA or to a contract account. In the latter case, it is possible to set the data field of the transaction (e.g. function signature and parameters). For this transaction not to fail, see the documentation of the `ExecutionFailed` event of this contract for a few things to keep in mind.
 
 Based on [ConsenSys-Academy/multisig-wallet-exercise](https://github.com/ConsenSys-Academy/multisig-wallet-exercise) and [ConsenSysMesh/MultiSigWallet](https://github.com/ConsenSysMesh/MultiSigWallet).

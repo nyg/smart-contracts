@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: ISC
 pragma solidity 0.8.4;
 
-/// @notice This contract allows a set of owners (defined during initialization) to submit, confirm and revoke
-/// transactions. A transaction is then executed if and only if it has been confirmed by a quorum of owners (also set
-/// during the initialization of the contract).
+/// @notice This contract allows a set of owners (defined during the contract's initialization) to submit, confirm and
+/// revoke transactions. A transaction is then executed if and only if it has been confirmed by a quorum of owners (also
+/// set during the initialization).
+///
+/// It is possible to send a transaction to an EOA or to a contract account. In the latter case, it is possible to set
+/// the data field of the transaction (e.g. function signature and parameters). For this transaction not to fail, see
+/// the documentation of the ExecutionFailed event of this contract for a few things to keep in mind.
 ///
 /// TODO
 /// - use Solidity custom errors
@@ -18,7 +22,7 @@ contract MultiSignatureWallet {
     /// @notice A transaction to be submitted, confirmed and revoked.
     /// @param destination The destination of the transaction, i.e. EOA or contract account.
     /// @param value The amount of Ether to be sent.
-    /// @param payload The calldata of the transaction.
+    /// @param payload The data of the transaction.
     /// @param executed A flag indicating if the transaction has been executed or not.
     struct Transaction {
         address payable destination;
@@ -167,7 +171,7 @@ contract MultiSignatureWallet {
     /// @notice Allows an owner to submit a transaction. The transaction will be automatically confirmed.
     /// @param destination The address to which the transaction will be sent.
     /// @param value The amount of Ether to be sent with the transaction.
-    /// @param payload The payload of the transaction (calldata).
+    /// @param payload The data of the transaction.
     /// @return transactionId Returns the transaction id.
     function submitTransaction(
         address payable destination,
