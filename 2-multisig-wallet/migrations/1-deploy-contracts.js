@@ -1,11 +1,8 @@
-const MultiSig = artifacts.require('MultiSignatureWallet')
+const MultiSignatureWallet = artifacts.require('MultiSignatureWallet')
 const SimpleStorage = artifacts.require('SimpleStorage')
 
 module.exports = function (deployer, _, accounts) {
-
-    const owners = [accounts[0], accounts[1], accounts[2]]
-    const quorum = Math.floor(owners.length / 2) + 1 // example
-
-    deployer.deploy(SimpleStorage)
-    deployer.deploy(MultiSig, owners, quorum)
+  // deploy multisig wallet with 3 owners and a quorum of 2
+  deployer.deploy(MultiSignatureWallet, accounts.slice(1, 4), 2)
+  deployer.deploy(SimpleStorage)
 }
