@@ -1,4 +1,4 @@
-const SimpleBank = artifacts.require('./SimpleBank.sol')
+const SimpleBank = artifacts.require('SimpleBank')
 
 module.exports = function (deployer) {
   deployer.deploy(SimpleBank)
