@@ -1,90 +1,99 @@
-/*
- * The public version of the file used for testing can be found here:
- *     https://gist.github.com/ConsenSys-Academy/ce47850a8e2cba6ef366625b665c7fba
- *
- * This test file has been updated for Truffle version 5.0. If your tests are failing, make sure that you are using
- * Truffle version 5.0. You can check this by running "trufffle version"  in the terminal. If version 5 is not
- * installed, you can uninstall the existing version with `npm uninstall -g truffle` and install the latest version with
- * `npm install -g truffle`.
- */
-let catchRevert = require('./exceptions-helpers').catchRevert
-var SimpleBank = artifacts.require('./SimpleBank.sol')
+const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
+const SimpleBank = artifacts.require('SimpleBank.sol')
 
-contract('SimpleBank', function (accounts) {
+contract('SimpleBank', accounts => {
+
+  const ENROLLED_EVENT = 'Enrolled'
+  const DEPOSIT_MADE_EVENT = 'DepositMade'
+  const WITHDRAWAL_MADE_EVENT = 'WithdrawalMade'
 
   const owner = accounts[0]
   const alice = accounts[1]
-  const bob = accounts[2]
-  const deposit = web3.utils.toBN(2)
+  const depositedAmount = new BN('2')
 
   let instance
   beforeEach(async () => {
     instance = await SimpleBank.new()
   })
 
-  it('should mark addresses as enrolled', async () => {
-    await instance.enroll({ from: alice })
 
-    const aliceEnrolled = await instance.enrolled(alice, { from: alice })
-    assert.equal(aliceEnrolled, true, 'enroll balance is incorrect, check balance method or constructor')
+  it('should mark addresses as enrolled', async () => {
+
+    expectEvent(
+      await instance.enroll({ from: alice }),
+      ENROLLED_EVENT,
+      { account: alice })
+
+    assert.equal(
+      await instance.enrolled(alice, { from: alice }),
+      true,
+      'enroll balance is incorrect, check balance method or constructor')
   })
+
 
   it('should not mark unenrolled users as enrolled', async () => {
-    const ownerEnrolled = await instance.enrolled(owner, { from: owner })
-    assert.equal(ownerEnrolled, false, 'only enrolled users should be marked enrolled')
+    assert.equal(
+      await instance.enrolled(owner, { from: owner }),
+      false,
+      'only enrolled users should be marked enrolled')
   })
+
 
   it('should deposit correct amount', async () => {
-    await instance.enroll({ from: alice })
-    await instance.deposit({ from: alice, value: deposit })
-    const balance = await instance.getBalance({ from: alice })
 
-    assert.equal(deposit.toString(), balance, 'deposit amount incorrect, check deposit method')
+    await instance.enroll({ from: alice })
+    await instance.deposit({ from: alice, value: depositedAmount })
+
+    assert.equal(
+      await instance.getBalance({ from: alice }),
+      depositedAmount.toString(),
+      'deposit amount incorrect, check deposit method')
   })
+
 
   it('should log a deposit event when a deposit is made', async () => {
+
     await instance.enroll({ from: alice })
-    const result = await instance.deposit({ from: alice, value: deposit })
 
-    const expectedEventResult = { account: alice, amount: deposit }
-
-    const logAccountAddress = result.logs[0].args.account
-    const logDepositAmount = result.logs[0].args.amount.toNumber()
-
-    assert.equal(expectedEventResult.account, logAccountAddress, 'LogDepositMade event account property not emitted, check deposit method')
-    assert.equal(expectedEventResult.amount, logDepositAmount, 'LogDepositMade event amount property not emitted, check deposit method')
+    expectEvent(
+      await instance.deposit({ from: alice, value: depositedAmount }),
+      DEPOSIT_MADE_EVENT,
+      { account: alice, amount: depositedAmount })
   })
+
 
   it('should withdraw correct amount', async () => {
-    const initialAmount = 0
-    await instance.enroll({ from: alice })
-    await instance.deposit({ from: alice, value: deposit })
-    await instance.withdraw(deposit, { from: alice })
-    const balance = await instance.getBalance({ from: alice })
 
-    assert.equal(balance.toString(), initialAmount.toString(), 'balance incorrect after withdrawal, check withdraw method')
+    await instance.enroll({ from: alice })
+    await instance.deposit({ from: alice, value: depositedAmount })
+    await instance.withdraw(depositedAmount, { from: alice })
+
+    assert.equal(
+      await instance.getBalance({ from: alice }),
+      0,
+      'balance incorrect after withdrawal, check withdraw method')
   })
+
 
   it('should not be able to withdraw more than has been deposited', async () => {
+
     await instance.enroll({ from: alice })
-    await instance.deposit({ from: alice, value: deposit })
-    await catchRevert(instance.withdraw(deposit + 1, { from: alice }))
+    await instance.deposit({ from: alice, value: depositedAmount })
+
+    await expectRevert(
+      instance.withdraw(depositedAmount.add(new BN(1)), { from: alice }),
+      'Insufficient funds')
   })
 
+
   it('should emit the appropriate event when a withdrawal is made', async () => {
-    const initialAmount = 0
+
     await instance.enroll({ from: alice })
-    await instance.deposit({ from: alice, value: deposit })
-    var result = await instance.withdraw(deposit, { from: alice })
+    await instance.deposit({ from: alice, value: depositedAmount })
 
-    const accountAddress = result.logs[0].args.account
-    const newBalance = result.logs[0].args.newBalance.toNumber()
-    const withdrawAmount = result.logs[0].args.amount.toNumber()
-
-    const expectedEventResult = { account: alice, newBalance: initialAmount, amount: deposit }
-
-    assert.equal(expectedEventResult.account, accountAddress, 'LogWithdrawal event account property not emitted, check deposit method')
-    assert.equal(expectedEventResult.newBalance, newBalance, 'LogWithdrawal event newBalance property not emitted, check deposit method')
-    assert.equal(expectedEventResult.amount, withdrawAmount, 'LogWithdrawal event amount property not emitted, check deposit method')
+    expectEvent(
+      await instance.withdraw(depositedAmount, { from: alice }),
+      WITHDRAWAL_MADE_EVENT,
+      { account: alice, newBalance: new BN(0), amount: depositedAmount })
   })
 })
