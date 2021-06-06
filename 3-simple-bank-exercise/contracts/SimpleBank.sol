@@ -6,14 +6,14 @@ contract SimpleBank {
     // State variables
     //
 
-    /* Fill in the keyword. Hint: We want to protect our users balance from other contracts*/
-    mapping(address => uint256) balances;
+    /// @notice Account balances of the bank's clients.
+    mapping(address => uint256) private balances;
 
-    /* Fill in the keyword. We want to create a getter function and allow contracts to be able to see if a user is enrolled.  */
-    mapping(address => bool) enrolled;
+    /// @notice The bank's clients.
+    mapping(address => bool) public enrolled;
 
-    /* Let's make sure everyone knows who owns the bank. Use the appropriate keyword for this*/
-    address owner;
+    /// @notice The owner of the bank.
+    address public owner;
 
     //
     // Events - publicize actions to external listeners
