@@ -39,7 +39,8 @@ contract('SupplyChain', accounts => {
   it('should emit a ForSale event when an item is added', async () => {
     expectEvent(
       await instance.addItem(name, price, { from: alice }),
-      FOR_SALE_EVENT)
+      FOR_SALE_EVENT,
+      { sku: new BN('0') })
   })
 
 
@@ -83,7 +84,7 @@ contract('SupplyChain', accounts => {
 
     await expectRevert(
       instance.buyItem(0, { from: bob, value: 1 }),
-      '...')
+      'Insufficient payed amount')
   })
 
 
@@ -93,7 +94,8 @@ contract('SupplyChain', accounts => {
 
     expectEvent(
       await instance.buyItem(0, { from: bob, value: excessAmount }),
-      SOLD_EVENT)
+      SOLD_EVENT,
+      { sku: new BN('0') })
   })
 
 
@@ -104,7 +106,7 @@ contract('SupplyChain', accounts => {
 
     await expectRevert(
       instance.shipItem(0, { from: bob }),
-      '...')
+      'Caller must be the seller')
   })
 
 
@@ -129,7 +131,8 @@ contract('SupplyChain', accounts => {
 
     expectEvent(
       await instance.shipItem(0, { from: alice }),
-      SHIPPED_EVENT)
+      SHIPPED_EVENT,
+      { sku: new BN('0') })
   })
 
 
@@ -156,7 +159,7 @@ contract('SupplyChain', accounts => {
 
     await expectRevert(
       instance.receiveItem(0, { from: alice }),
-      '...')
+      'Caller must be the buyer')
   })
 
 
@@ -168,6 +171,7 @@ contract('SupplyChain', accounts => {
 
     expectEvent(
       await instance.receiveItem(0, { from: bob }),
-      RECEIVED_EVENT)
+      RECEIVED_EVENT,
+      { sku: new BN('0') })
   })
 })
