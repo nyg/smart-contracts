@@ -10,6 +10,7 @@
       {
         "maxLength": 64
       }
-    ]
+    ],
+    "avoid-low-level-calls": "off"
   }
 }
