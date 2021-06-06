@@ -2,9 +2,10 @@
 pragma solidity 0.8.4;
 
 contract SimpleBank {
-    //
-    // State variables
-    //
+
+    /*
+     * State variables
+     */
 
     /// @notice Account balances of the bank's clients.
     mapping(address => uint256) private balances;
@@ -15,22 +16,22 @@ contract SimpleBank {
     /// @notice The owner of the bank.
     address public owner;
 
-    //
-    // Events - publicize actions to external listeners
-    //
+    /*
+     * Events
+     */
 
-    /* Add an argument for this event, an accountAddress */
-    event LogEnrolled();
+    /// @notice A client has enrolled in the bank.
+    event LogEnrolled(address indexed account);
 
-    /* Add 2 arguments for this event, an accountAddress and an amount */
-    event LogDepositMade();
+    /// @notice A deposit was made.
+    event LogDepositMade(address indexed account, uint256 amount);
 
-    /* Create an event called LogWithdrawal */
-    /* Add 3 arguments for this event, an accountAddress, withdrawAmount and a newBalance */
+    /// @notice A withdrawal was made.
+    event LogWithdrawalMade(address indexed account, uint256 amount, uint256 newBalance);
 
-    //
-    // Functions
-    //
+    /*
+     * Functions
+     */
 
     /* Use the appropriate global variable to get the sender of the transaction */
     constructor() {
