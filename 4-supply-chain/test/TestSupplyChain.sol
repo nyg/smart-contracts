@@ -1,27 +1,63 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: ISC
+pragma solidity 0.8.4;
 
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/SupplyChain.sol";
 
 contract TestSupplyChain {
+    /// @dev Initial balance of test contract.
+    uint256 public initialBalance = 2 ether;
 
-    // Test for failing conditions in this contracts:
-    // https://truffleframework.com/tutorials/testing-for-throws-in-solidity-tests
+    /// @dev Necessary because SupplyChain will send Ether back to the test contract.
+    receive() external payable {}
 
-    // buyItem
+    SupplyChain public instance;
 
-    // test for failure if user does not send enough funds
-    // test for purchasing an item that is not for Sale
+    function beforeEach() public {
+        instance = new SupplyChain();
 
-    // shipItem
+        (bool funded, ) = address(instance).call{value: 0.01 ether}("");
+        require(funded, "Funding failed");
+    }
 
-    // test for calls that are made by not the seller
-    // test for trying to ship an item that is not marked Sold
+    /* Buy Item */
 
-    // receiveItem
+    function testBuyItemSuccessfull() public {
+        uint256 sku = instance.addItem("my car", 0.001 ether);
+        instance.buyItem{value: 0.0011 ether}(sku);
 
-    // test calling the function from an address that is not the buyer
-    // test calling the function on an item not marked Shipped
+        (, , , SupplyChain.State itemState, , ) = instance.items(sku);
+        Assert.isTrue(
+            itemState == SupplyChain.State.Sold,
+            "Item should have been sold"
+        );
+    }
 
+    function testBuyItemWithoutSufficientAmount() public {
+        uint256 sku = instance.addItem("my car", 0.001 ether);
+
+        (bool bought, ) =
+            address(instance).call{value: 0.0009 ether}(
+                abi.encodeWithSignature("buyItem(uint256)", sku)
+            );
+        Assert.isFalse(
+            bought,
+            "Should not be able to buy item without the sufficient sent amount"
+        );
+    }
+
+    // function testBuyItemThatIsNotForSale() public {}
+
+    // /* Ship Item */
+
+    // function testShipItemCallNotMadeBySeller() public {}
+
+    // function testShipItemThatIsNotSold() public {}
+
+    // /* Receive Item */
+
+    // function testReceiveItemCallNotMadeByBuyer() public {}
+
+    // function testReceiveItemThatIsNotShipped() public {}
 }
