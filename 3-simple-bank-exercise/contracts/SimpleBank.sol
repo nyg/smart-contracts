@@ -20,13 +20,13 @@ contract SimpleBank {
      */
 
     /// @notice A client has enrolled with the bank.
-    event LogEnrolled(address indexed account);
+    event Enrolled(address indexed account);
 
     /// @notice A deposit was made.
-    event LogDepositMade(address indexed account, uint256 amount);
+    event DepositMade(address indexed account, uint256 amount);
 
     /// @notice A withdrawal was made.
-    event LogWithdrawalMade(
+    event WithdrawalMade(
         address indexed account,
         uint256 amount,
         uint256 newBalance
@@ -60,7 +60,7 @@ contract SimpleBank {
     function enroll() external returns (bool) {
         if (!enrolled[msg.sender]) {
             enrolled[msg.sender] = true;
-            emit LogEnrolled(msg.sender);
+            emit Enrolled(msg.sender);
         }
 
         return true;
@@ -75,7 +75,7 @@ contract SimpleBank {
         returns (uint256)
     {
         balances[msg.sender] += msg.value;
-        emit LogDepositMade(msg.sender, msg.value);
+        emit DepositMade(msg.sender, msg.value);
         return balances[msg.sender];
     }
 
@@ -87,7 +87,7 @@ contract SimpleBank {
         senderMustBeEnrolled()
         returns (uint256)
     {
-        require(balances[msg.sender] >= amount, "Unsufficient funds");
+        require(balances[msg.sender] >= amount, "Insufficient funds");
 
         balances[msg.sender] -= amount;
 
@@ -95,7 +95,7 @@ contract SimpleBank {
         require(sent, "Withdrawal failed");
 
         uint256 newBalance = balances[msg.sender];
-        emit LogWithdrawalMade(msg.sender, amount, newBalance);
+        emit WithdrawalMade(msg.sender, amount, newBalance);
         return newBalance;
     }
 }
