@@ -1,4 +1,4 @@
-const { BN, balance, constants, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
+const { balance, constants, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
 const MultiSignatureWallet = artifacts.require('MultiSignatureWallet')
 const SimpleStorage = artifacts.require('SimpleStorage')
 
