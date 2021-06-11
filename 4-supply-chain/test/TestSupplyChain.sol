@@ -4,60 +4,104 @@ pragma solidity 0.8.4;
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/SupplyChain.sol";
+import "./helpers/User.sol";
 
 contract TestSupplyChain {
     /// @dev Initial balance of test contract.
     uint256 public initialBalance = 2 ether;
 
-    /// @dev Necessary because SupplyChain will send Ether back to the test contract.
-    receive() external payable {}
+    /// @dev Create two users that will be used to call the functions of the contract to be tested.
+    User private aUser = new User();
+    User private anotherUser = new User();
 
-    SupplyChain public instance;
+    function beforeAll() external {
+        (bool funded, ) = address(aUser).call{value: 0.1 ether}("");
+        require(funded, "Funding of aUser failed");
 
-    function beforeEach() public {
-        instance = new SupplyChain();
+        (funded, ) = address(anotherUser).call{value: 0.1 ether}("");
+        require(funded, "Funding of anotherUser failed");
+    }
 
-        (bool funded, ) = address(instance).call{value: 0.01 ether}("");
+    /// @dev Instance of the contract to be tested, will be deployed before each test.
+    SupplyChain private supplyChain;
+
+    function beforeEach() external {
+        supplyChain = new SupplyChain();
+
+        (bool funded, ) = address(supplyChain).call{value: 0.01 ether}("");
         require(funded, "Funding failed");
     }
 
     /* Buy Item */
 
-    function testBuyItemSuccessfull() public {
-        uint256 sku = instance.addItem("my car", 0.001 ether);
-        instance.buyItem{value: 0.0011 ether}(sku);
+    function testBuyItemSuccessfull() external {
+        uint256 sku = aUser.addsItem(supplyChain, "my car", 0.001 ether);
+        anotherUser.buysItem{value: 0.001 ether}(supplyChain, sku);
 
-        (, , , SupplyChain.State itemState, , ) = instance.items(sku);
+        (, , , SupplyChain.State itemState, , ) = supplyChain.items(sku);
         Assert.isTrue(
             itemState == SupplyChain.State.Sold,
             "Item should have been sold"
         );
     }
 
-    function testBuyItemWithoutSufficientAmount() public {
-        uint256 sku = instance.addItem("my car", 0.001 ether);
+    function testBuyItemWithoutSufficientAmount() external {
+        uint256 sku = aUser.addsItem(supplyChain, "my car", 0.001 ether);
 
-        (bool bought, ) =
-            address(instance).call{value: 0.0009 ether}(
-                abi.encodeWithSignature("buyItem(uint256)", sku)
-            );
         Assert.isFalse(
-            bought,
+            anotherUser.triesToBuyItem{value: 0.0009 ether}(supplyChain, sku),
             "Should not be able to buy item without the sufficient sent amount"
         );
     }
 
-    // function testBuyItemThatIsNotForSale() public {}
+    function testBuyItemThatIsNotForSale() external {
+        uint256 sku = aUser.addsItem(supplyChain, "my car", 0.001 ether);
+        anotherUser.buysItem{value: 0.001 ether}(supplyChain, sku);
 
-    // /* Ship Item */
+        Assert.isFalse(
+            anotherUser.triesToBuyItem(supplyChain, sku),
+            "Should not be able to buy an item that is not for sale"
+        );
+    }
 
-    // function testShipItemCallNotMadeBySeller() public {}
+    /* Ship Item */
 
-    // function testShipItemThatIsNotSold() public {}
+    function testShipItemCallNotMadeBySeller() external {
+        uint256 sku = aUser.addsItem(supplyChain, "my car", 0.001 ether);
+        anotherUser.buysItem{value: 0.001 ether}(supplyChain, sku);
 
-    // /* Receive Item */
+        Assert.isFalse(
+            anotherUser.triesToShipItem(supplyChain, sku),
+            "Only the seller should be able to ship his item"
+        );
+    }
 
-    // function testReceiveItemCallNotMadeByBuyer() public {}
+    function testShipItemThatIsNotSold() external {
+        uint256 sku = aUser.addsItem(supplyChain, "my car", 0.001 ether);
 
-    // function testReceiveItemThatIsNotShipped() public {}
+        Assert.isFalse(
+            anotherUser.triesToShipItem(supplyChain, sku),
+            "Should not be able to ship an item that was not bought"
+        );
+    }
+
+    /* Receive Item */
+
+    function testReceiveItemCallNotMadeByBuyer() external {
+        uint256 sku = aUser.addsItem(supplyChain, "my car", 0.001 ether);
+
+        Assert.isFalse(
+            aUser.triesToReceiveItem(supplyChain, sku),
+            "Should not be able to receive an item that was not shipped"
+        );
+    }
+
+    function testReceiveItemThatIsNotShipped() external {
+        uint256 sku = aUser.addsItem(supplyChain, "my car", 0.001 ether);
+
+        Assert.isFalse(
+            anotherUser.triesToReceiveItem(supplyChain, sku),
+            "Should not be able to receive an item that was not shipped"
+        );
+    }
 }
