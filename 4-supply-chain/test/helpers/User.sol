@@ -4,6 +4,7 @@ pragma solidity 0.8.4;
 import "../../contracts/SupplyChain.sol";
 
 contract User {
+
     /// @dev Necessary to fund the contract and receive Ether sent back by the SupplyChain contract.
     receive() external payable {}
 

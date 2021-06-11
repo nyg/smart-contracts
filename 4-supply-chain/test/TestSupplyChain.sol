@@ -7,6 +7,7 @@ import "../contracts/SupplyChain.sol";
 import "./helpers/User.sol";
 
 contract TestSupplyChain {
+
     /// @dev Initial balance of test contract.
     uint256 public initialBalance = 2 ether;
 

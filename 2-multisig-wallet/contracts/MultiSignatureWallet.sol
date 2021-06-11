@@ -249,7 +249,11 @@ contract MultiSignatureWallet {
     /// @notice Checks if the quorum has been obtained for a given transaction.
     /// @param transactionId The id of the transaction to be checked.
     /// @return Returns true if the quorum has been obtained, false otherwise.
-    function quorumObtainedFor(uint256 transactionId) private view returns (bool) {
+    function quorumObtainedFor(uint256 transactionId)
+        private
+        view
+        returns (bool)
+    {
         uint256 confirmationCount;
         for (uint256 i = 0; i < owners.length; i++) {
             if (confirmations[transactionId][owners[i]]) {

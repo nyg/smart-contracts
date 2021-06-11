@@ -18,7 +18,6 @@ contract ProofOfExistence {
     /// @notice Indicates if a proof has been stored in the contract's state.
     mapping(bytes32 => bool) private proofs;
 
-
     /// @notice Notarize the given document, i.e. compute the document's proof
     /// (Keccak-256 hash) and store the proof in the contract's state.
     function notarize(string calldata document) external {
@@ -33,7 +32,11 @@ contract ProofOfExistence {
 
     /// @notice Check if the given document has already been notarized, i.e. if
     /// its proof already exists in the contract's state.
-    function wasNotarized(string calldata document) external view returns (bool) {
+    function wasNotarized(string calldata document)
+        external
+        view
+        returns (bool)
+    {
         return proofs[proofFor(document)];
     }
 
