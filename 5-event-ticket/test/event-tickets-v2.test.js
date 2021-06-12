@@ -120,8 +120,8 @@ contract('EventTicketV2', function (accounts) {
         await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, { from: deployAccount })
         await instance.buyTickets(0, numTickets, { from: firstAccount, value: ticketPrice * numTickets })
 
-        await catchRevert(instance.getRefund(0, { from: secondAccount }))
-        const tx = await instance.getRefund(0, { from: firstAccount })
+        await catchRevert(instance.getRefund(0, numTickets, { from: secondAccount }))
+        const tx = await instance.getRefund(0, numTickets, { from: firstAccount })
         const eventData = tx.logs[0]
 
         assert.equal(eventData.event, 'LogGetRefund', 'the event should be called LogGetRefund')
@@ -132,7 +132,7 @@ contract('EventTicketV2', function (accounts) {
         const preSaleAmount = await web3.eth.getBalance(secondAccount)
         await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, { from: deployAccount })
         const buyReceipt = await instance.buyTickets(0, 1, { from: secondAccount, value: ticketPrice })
-        const refundReceipt = await instance.getRefund(0, { from: secondAccount })
+        const refundReceipt = await instance.getRefund(0, 1, { from: secondAccount })
         const postSaleAmount = await web3.eth.getBalance(secondAccount)
 
         const buyTx = await web3.eth.getTransaction(buyReceipt.tx)
@@ -145,15 +145,15 @@ contract('EventTicketV2', function (accounts) {
       })
     })
 
-    describe('getBuyerNumberTickets()', async () => {
-      it('providing an event id to getBuyerNumberTickets() should tell an account how many tickets they have purchased', async () => {
+    describe('getBuyerTicketCount()', async () => {
+      it('providing an event id to getBuyerTicketCount() should tell an account how many tickets they have purchased', async () => {
         const numberToPurchase = 3
 
         await instance.addEvent(event1.description, event1.website, event1.ticketsAvailable, { from: deployAccount })
         await instance.buyTickets(0, numberToPurchase, { from: secondAccount, value: ticketPrice * numberToPurchase })
-        let result = await instance.getBuyerNumberTickets(0, { from: secondAccount })
+        let result = await instance.getBuyerTicketCount(0, { from: secondAccount })
 
-        assert.equal(result, numberToPurchase, 'getBuyerNumberTickets() should return the number of tickets the msg.sender has purchased.')
+        assert.equal(result, numberToPurchase, 'getBuyerTicketCount() should return the number of tickets the msg.sender has purchased.')
       })
     })
 
