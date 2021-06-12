@@ -17,7 +17,6 @@ contract('EventTicket', function (accounts) {
   const ticketPrice = 100
 
   let instance
-
   beforeEach(async () => {
     instance = await EventTickets.new(description, url, ticketNumber)
   })
@@ -30,9 +29,7 @@ contract('EventTicket', function (accounts) {
     })
 
     it('sales should be open when the contract is created', async () => {
-      const instance = await EventTickets.new(description, url, ticketNumber)
       const eventDetails = await instance.readEvent()
-
       assert.equal(eventDetails.isOpen, true, 'the event should be open')
     })
   })
@@ -100,7 +97,7 @@ contract('EventTicket', function (accounts) {
       it('buyers should be refunded the appropriate value amount when submitting a refund', async () => {
         const preSaleAmount = await web3.eth.getBalance(secondAccount)
         const buyReceipt = await instance.buyTickets(1, { from: secondAccount, value: ticketPrice })
-        const refundReceipt = await instance.getRefund({ from: secondAccount })
+        const refundReceipt = await instance.getRefund(1, { from: secondAccount })
         const postSaleAmount = await web3.eth.getBalance(secondAccount)
 
         const buyTx = await web3.eth.getTransaction(buyReceipt.tx)
@@ -109,7 +106,10 @@ contract('EventTicket', function (accounts) {
         const refundTx = await web3.eth.getTransaction(refundReceipt.tx)
         let refundTxCost = Number(refundTx.gasPrice) * refundReceipt.receipt.gasUsed
 
-        assert.equal(postSaleAmount, (new BN(preSaleAmount).sub(new BN(buyTxCost)).sub(new BN(refundTxCost))).toString(), 'buyer should be fully refunded when calling getRefund()')
+        assert.equal(
+          postSaleAmount,
+          (new BN(preSaleAmount).sub(new BN(buyTxCost)).sub(new BN(refundTxCost))).toString(),
+          'buyer should be fully refunded when calling getRefund()')
       })
     })
 
@@ -142,7 +142,10 @@ contract('EventTicket', function (accounts) {
         const endSaleTx = await web3.eth.getTransaction(endSaleReceipt.tx)
         let endSaleTxCost = Number(endSaleTx.gasPrice) * endSaleReceipt.receipt.gasUsed
 
-        assert.equal(postSaleAmount, (new BN(preSaleAmount).add(new BN(numberOfTickets).mul(new BN(ticketPrice))).sub(new BN(endSaleTxCost))).toString(), 'contract owner should receive contract balance when closing the event')
+        assert.equal(
+          postSaleAmount,
+          (new BN(preSaleAmount).add(new BN(numberOfTickets).mul(new BN(ticketPrice))).sub(new BN(endSaleTxCost))).toString(),
+          'contract owner should receive contract balance when closing the event')
       })
     })
   })
