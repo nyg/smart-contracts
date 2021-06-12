@@ -1,18 +1,17 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.8.5;
 
-    /*
+/*
         The EventTickets contract keeps track of the details and ticket sales of one event.
      */
 
 contract EventTickets {
-
     /*
         Create a public state variable called owner.
         Use the appropriate keyword to create an associated getter function.
         Use the appropriate keyword to allow ether transfers.
      */
 
-    uint   TICKET_PRICE = 100 wei;
+    uint256 TICKET_PRICE = 100 wei;
 
     /*
         Create a struct called "Event".
@@ -48,10 +47,14 @@ contract EventTickets {
     */
     function readEvent()
         public
-        returns(string memory description, string memory website, uint totalTickets, uint sales, bool isOpen)
-    {
-
-    }
+        returns (
+            string memory description,
+            string memory website,
+            uint256 totalTickets,
+            uint256 sales,
+            bool isOpen
+        )
+    {}
 
     /*
         Define a function called getBuyerTicketCount().
