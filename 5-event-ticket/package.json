@@ -11,6 +11,6 @@
     "@truffle/hdwallet-provider": "1.4.0",
     "eslint": "7.28.0",
     "solhint": "3.3.6",
-    "truffle": "5.3.9"
+    "truffle": "5.3.10"
   }
 }
