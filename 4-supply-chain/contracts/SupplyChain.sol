@@ -113,8 +113,6 @@ contract SupplyChain {
      * Functions
      */
 
-    receive() external payable {}
-
     /// @notice Allows a user to put up an item for sale.
     function addItem(string calldata name, uint256 price)
         external

@@ -28,9 +28,6 @@ contract TestSupplyChain {
 
     function beforeEach() external {
         supplyChain = new SupplyChain();
-
-        (bool funded, ) = address(supplyChain).call{value: 0.01 ether}("");
-        require(funded, "Funding failed");
     }
 
     /* Buy Item */
