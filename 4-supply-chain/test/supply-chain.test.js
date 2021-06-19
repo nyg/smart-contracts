@@ -15,7 +15,7 @@ contract('SupplyChain', accounts => {
 
   const price = '1000'
   const excessAmount = '2000'
-  const name = 'book'
+  const name = 'my book'
 
   let instance
   beforeEach(async () => {
@@ -27,12 +27,12 @@ contract('SupplyChain', accounts => {
 
     await instance.addItem(name, price, { from: alice })
 
-    const result = await instance.fetchItem.call(0)
-    assert.equal(result[0], name, 'the name of the last added item does not match the expected value')
-    assert.equal(result[2].toString(10), price, 'the price of the last added item does not match the expected value')
-    assert.equal(result[3].toString(10), 0, 'the state of the item should be "For Sale", which should be declared first in the State Enum')
-    assert.equal(result[4], alice, 'the address adding the item should be listed as the seller')
-    assert.equal(result[5], emptyAddress, 'the buyer address should be set to 0 when an item is added')
+    const item = await instance.fetchItem(0)
+    assert.equal(item.name, name, 'name does not match')
+    assert.equal(item.price, price, 'price does not match')
+    assert.equal(item.state, 0, 'state should be ForSale')
+    assert.equal(item.seller, alice, 'seller should be Alice')
+    assert.equal(item.buyer, emptyAddress, 'buy should not be set')
   })
 
 
@@ -40,41 +40,34 @@ contract('SupplyChain', accounts => {
     expectEvent(
       await instance.addItem(name, price, { from: alice }),
       FOR_SALE_EVENT,
-      { sku: new BN('0') })
+      { sku: '0' })
   })
 
 
   it('should allow someone to purchase an item and update state accordingly', async () => {
 
     await instance.addItem(name, price, { from: alice })
-    let aliceBalanceBefore = await web3.eth.getBalance(alice)
-    let bobBalanceBefore = await web3.eth.getBalance(bob)
+    const aliceBalanceBefore = await web3.eth.getBalance(alice)
+    const bobBalanceBefore = await web3.eth.getBalance(bob)
 
     await instance.buyItem(0, { from: bob, value: excessAmount })
-    let aliceBalanceAfter = await web3.eth.getBalance(alice)
-    let bobBalanceAfter = await web3.eth.getBalance(bob)
+    const aliceBalanceAfter = await web3.eth.getBalance(alice)
+    const bobBalanceAfter = await web3.eth.getBalance(bob)
 
-    const result = await instance.fetchItem.call(0)
+    const item = await instance.fetchItem(0)
 
-    assert.equal(
-      result[3].toString(10),
-      1,
-      'the state of the item should be "Sold", which should be declared second in the State Enum')
+    assert.equal(item.state, 1, 'state should be Sold')
+    assert.equal(item.buyer, bob, 'buyer should be Bob')
 
     assert.equal(
-      result[5],
-      bob,
-      'the buyer address should be set bob when he purchases an item')
-
-    assert.equal(
-      new BN(aliceBalanceAfter).toString(),
+      aliceBalanceAfter,
       new BN(aliceBalanceBefore).add(new BN(price)).toString(),
-      'alice\'s balance should be increased by the price of the item')
+      'Alice\'s balance should have increased by the price of the item')
 
     assert.isBelow(
       Number(bobBalanceAfter),
-      Number(new BN(bobBalanceBefore).sub(new BN(price))),
-      'bob\'s balance should be reduced by more than the price of the item (including gas costs)')
+      bobBalanceBefore - price,
+      'Bob\'s balance should have been reduced by more than the price of the item (including gas costs)')
   })
 
 
@@ -95,7 +88,7 @@ contract('SupplyChain', accounts => {
     expectEvent(
       await instance.buyItem(0, { from: bob, value: excessAmount }),
       SOLD_EVENT,
-      { sku: new BN('0') })
+      { sku: '0' })
   })
 
 
@@ -116,11 +109,8 @@ contract('SupplyChain', accounts => {
     await instance.buyItem(0, { from: bob, value: excessAmount })
     await instance.shipItem(0, { from: alice })
 
-    const result = await instance.fetchItem.call(0)
-    assert.equal(
-      result[3].toString(10),
-      2,
-      'the state of the item should be "Shipped", which should be declared third in the State Enum')
+    const item = await instance.fetchItem(0)
+    assert.equal(item.state, 2, 'state should be Shipped')
   })
 
 
@@ -132,7 +122,7 @@ contract('SupplyChain', accounts => {
     expectEvent(
       await instance.shipItem(0, { from: alice }),
       SHIPPED_EVENT,
-      { sku: new BN('0') })
+      { sku: '0' })
   })
 
 
@@ -143,11 +133,8 @@ contract('SupplyChain', accounts => {
     await instance.shipItem(0, { from: alice })
     await instance.receiveItem(0, { from: bob })
 
-    const result = await instance.fetchItem.call(0)
-    assert.equal(
-      result[3].toString(10),
-      3,
-      'the state of the item should be "Received", which should be declared fourth in the State Enum')
+    const item = await instance.fetchItem(0)
+    assert.equal(item.state, 3, 'state should be Received')
   })
 
 
@@ -172,6 +159,6 @@ contract('SupplyChain', accounts => {
     expectEvent(
       await instance.receiveItem(0, { from: bob }),
       RECEIVED_EVENT,
-      { sku: new BN('0') })
+      { sku: '0' })
   })
 })

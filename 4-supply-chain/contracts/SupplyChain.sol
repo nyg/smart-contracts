@@ -5,7 +5,6 @@ pragma solidity 0.8.4;
 /// items, let sellers notify the buyer that an item has been shipped and let buyers notify the seller that the item has
 /// been received.
 contract SupplyChain {
-
     /*
      * State variables
      */
@@ -168,20 +167,21 @@ contract SupplyChain {
         external
         view
         returns (
-            string memory name,
             uint256 sku,
+            string memory name,
             uint256 price,
             uint256 state,
             address seller,
             address buyer
         )
     {
-        name = items[_sku].name;
-        sku = items[_sku].sku;
-        price = items[_sku].price;
-        state = uint256(items[_sku].state);
-        seller = items[_sku].seller;
-        buyer = items[_sku].buyer;
-        return (name, sku, price, state, seller, buyer);
+        return (
+            items[_sku].sku,
+            items[_sku].name,
+            items[_sku].price,
+            uint256(items[_sku].state),
+            items[_sku].seller,
+            items[_sku].buyer
+        );
     }
 }
