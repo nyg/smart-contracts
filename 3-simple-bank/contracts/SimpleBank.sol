@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: ISC
 pragma solidity 0.8.4;
 
+/// @notice This contract acts as a simple bank, allowing users to enroll (i.e. create an account), to deposit and to
+/// withdraw funds.
 contract SimpleBank {
 
     /*

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: ISC
 pragma solidity 0.8.4;
 
-/// @notice
+/// @notice This contract provides four different functions that let users to put up items for sale, let users buy such
+/// items, let sellers notify the buyer that an item has been shipped and let buyers notify the seller that the item has
+/// been received.
 contract SupplyChain {
 
     /*

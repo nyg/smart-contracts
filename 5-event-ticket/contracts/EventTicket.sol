@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: ISC
 pragma solidity 0.8.5;
 
-/// @notice The EventTicketsV2 contract keeps track of the details and ticket ticketSoldCount of multiple events.
+/// @notice This contract allows the owner to create events for which a given number of tickets can be sold at a given
+/// price. It is possible for the owner to end the sale of tickets for an event and to receive the proceeds to the sale.
+/// It is also possible for a buyer to get his tickets refunded.
 contract EventTicket {
     /*
      * State variables

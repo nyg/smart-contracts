@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: ISC
 pragma solidity 0.8.4;
 
-/// @notice This contract allows senders to notarize documents. A hash of the
-/// document will be stored in the contract's state.
-///
-/// Note that the content of the document is stored in the transaction, it is
-/// therefore public and influences the cost of the transaction to notarize it.
+/// @notice This contract allows for senders to notarize documents. A hash of the document is computed and then stored
+/// in the contract's state. Note that the content of the document is sent within the transaction to notarize it,
+/// therefore it is public and it size will impact the cost of the transaction.
 contract ProofOfExistence {
 
     /// @notice Error thrown if a sender tries to notarize an already notarized
