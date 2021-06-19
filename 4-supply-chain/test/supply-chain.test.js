@@ -1,4 +1,3 @@
-
 const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
 const SupplyChain = artifacts.require('SupplyChain')
 

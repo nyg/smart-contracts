@@ -2,7 +2,7 @@ const { expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
 const ProofOfExistence = artifacts.require('ProofOfExistence')
 
 
-contract('ProofOfExistence', accounts => {
+contract('ProofOfExistence', () => {
 
   const document = 'Lorem ipsum'
 
@@ -10,6 +10,7 @@ contract('ProofOfExistence', accounts => {
   beforeEach(async () => {
     instance = await ProofOfExistence.new()
   })
+
 
   it('should notarize a given document', async () => {
 
@@ -22,6 +23,7 @@ contract('ProofOfExistence', accounts => {
 
     assert.isTrue(await instance.wasNotarized(document))
   })
+
 
   it('should not notarize an already notarized document', async () => {
     await instance.notarize(document)
