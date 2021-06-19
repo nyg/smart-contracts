@@ -15,9 +15,6 @@ contract SimpleBank {
     /// @notice The clients of the bank.
     mapping(address => bool) public enrolled;
 
-    /// @notice The owner of the bank.
-    address public owner;
-
     /*
      * Events
      */
@@ -47,11 +44,6 @@ contract SimpleBank {
     /*
      * Functions
      */
-
-    /// @notice Sets the creator of the contract as the owner of the bank.
-    constructor() {
-        owner = msg.sender;
-    }
 
     /// @notice Returns the balance of the sender's account.
     function getBalance() external view returns (uint256) {
@@ -84,11 +76,11 @@ contract SimpleBank {
 
     /// @notice Withdraws Ether from the bank.
     /// @param amount The amount of Ether to be withdrawn.
-    /// @return The client's account balance after the withdrawal was made.
+    /// @return newBalance The client's account balance after the withdrawal was made.
     function withdraw(uint256 amount)
         external
         senderMustBeEnrolled()
-        returns (uint256)
+        returns (uint256 newBalance)
     {
         require(balances[msg.sender] >= amount, "Insufficient funds");
 
@@ -97,8 +89,7 @@ contract SimpleBank {
         (bool sent, ) = msg.sender.call{value: amount}("");
         require(sent, "Withdrawal failed");
 
-        uint256 newBalance = balances[msg.sender];
+        newBalance = balances[msg.sender];
         emit WithdrawalMade(msg.sender, amount, newBalance);
-        return newBalance;
     }
 }
