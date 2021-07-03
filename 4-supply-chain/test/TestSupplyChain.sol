@@ -2,7 +2,6 @@
 pragma solidity 0.8.4;
 
 import "truffle/Assert.sol";
-import "truffle/DeployedAddresses.sol";
 import "../contracts/SupplyChain.sol";
 import "./helpers/User.sol";
 
