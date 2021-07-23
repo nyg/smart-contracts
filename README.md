@@ -3,8 +3,13 @@
 ## Commands
 
 ```shell
-cd 1-proof-of-existence
+# install npm dependencies
 npm install
+
+# run web server for the PetShop contract
+npm run dev
+
+# truffle commands
 npx truffle test
 npx truffle compile
 npx truffle migrate
@@ -46,3 +51,10 @@ Based on [ConsenSys-Academy/supply-chain-exercise](https://github.com/ConsenSys-
 This contract allows the owner to create events for which a given number of tickets can be sold at a given price. It is possible for the owner to end the sale of tickets for an event and to receive the proceeds to the sale. It is also possible for a buyer to get his tickets refunded.
 
 Based on [ConsenSys-Academy/event-ticket-exercise](https://github.com/ConsenSys-Academy/event-ticket-exercise).
+
+## 6. Pet Shop
+
+This contract allows anyone to adopt a pet. A pet can only be adopted once and there are only 16 different pets. The purpose of this simple contract is to provide a simple dapp exemple for which a web interface can be written.
+
+Based on [trufflesuite.com/tutorial](https://www.trufflesuite.com/tutorial) and [truffle-box/pet-shop-box](https://github.com/truffle-box/pet-shop-box).
+
