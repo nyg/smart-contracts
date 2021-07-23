@@ -30,20 +30,21 @@ function App() {
 
   this.init = () => {
 
-    if (initEthereumProvider()) {
+    loadPets().then(() => {
 
-      // blockchain
-      handleChainChanges()
-      detectChainStatus()
-      handleNewBlocks()
-      handleChainSubscriptions()
+      if (initEthereumProvider()) {
 
-      // user
-      handleUserAccountsChanges()
-      handleUserConnectionRequest()
-    }
+        // blockchain
+        handleChainChanges()
+        detectChainStatus()
+        handleNewBlocks()
+        handleChainSubscriptions()
 
-    loadPets()
+        // user
+        handleUserAccountsChanges()
+        handleUserConnectionRequest()
+      }
+    })
   }
 
 
@@ -320,8 +321,7 @@ function App() {
    */
 
 
-  const loadPets = () => {
-
+  const loadPets = () =>
     fetch('../pets.json')
       .then(response => response.json())
       .then(pets =>
@@ -339,7 +339,6 @@ function App() {
           template.querySelector('button').setAttribute('data-id', pet.id)
           template.querySelector('button').addEventListener('click', adoptPet)
         }))
-  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
