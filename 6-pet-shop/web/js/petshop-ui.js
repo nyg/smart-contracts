@@ -36,7 +36,7 @@ function PetShopUI() {
 
     document.querySelector('.connect-button').addEventListener('click', connectButtonCallback)
 
-    fetch('../pets.json')
+    fetch('pets.json')
       .then(response => response.json())
       .then(pets =>
         pets.map(pet => {
