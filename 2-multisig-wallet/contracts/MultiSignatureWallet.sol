@@ -4,7 +4,7 @@ pragma solidity 0.8.4;
 /// @notice This contract allows a set of owners (defined during the contract's initialization) to submit, confirm and
 /// revoke transactions. A transaction is then executed if and only if it has been confirmed by a quorum of owners
 /// (also set during the initialization).
-
+///
 /// It is possible to send a transaction either to an EOA or to a contract account. In the latter case, it is possible
 /// to set the data field of the transaction (e.g. function signature and parameters). See the documentation of the
 /// `ExecutionFailed` event to prevent the transaction from failing.
