@@ -1,5 +1,9 @@
-const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
+const { BN, balance, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
 const EventTicket = artifacts.require('EventTicket')
+
+const computeFee = async receipt =>
+  new BN(receipt.gasUsed * (await web3.eth.getGasPrice()))
+
 
 contract('EventTicket', accounts => {
 
@@ -9,7 +13,7 @@ contract('EventTicket', accounts => {
   const TICKETS_REFUNDED_EVENT = 'TicketsRefunded'
 
 
-  const contractOwner = accounts[0]
+  const contractOwner = accounts[9]
   const firstAccount = accounts[3]
   const secondAccount = accounts[4]
 
@@ -37,7 +41,7 @@ contract('EventTicket', accounts => {
 
   let instance
   beforeEach(async () => {
-    instance = await EventTicket.new()
+    instance = await EventTicket.new({ from: contractOwner })
   })
 
 
@@ -145,37 +149,43 @@ contract('EventTicket', accounts => {
       })
 
 
-      it('should refund if account has purshased the tickets', async () => {
+      it('should refund if account has purchased the tickets', async () => {
 
-        // function to get the cost of a transaction
-        const getTxCost = async transaction => {
-          const gasUsed = transaction.receipt.gasUsed
-          const gasPrice = (await web3.eth.getTransaction(transaction.tx)).gasPrice
-          return gasUsed * gasPrice
-        }
+        const ticketsToBuy = new BN('10')
+        const ticketsToRefund = new BN('6')
+        const ticketsBought = ticketsToBuy.sub(ticketsToRefund)
+        const ticketPrice = new BN(event2.ticketPrice)
 
+        // add an event
         await instance.addEvent(...Object.values(event2), { from: contractOwner })
 
-        const ticketsToBuy = 10
-        const balanceBefore = await web3.eth.getBalance(secondAccount)
-        const buyReceipt = await instance.buyTickets(0, ticketsToBuy, { from: secondAccount, value: ticketsToBuy * event2.ticketPrice })
-        const refundReceipt = await instance.getRefund(0, ticketsToBuy, { from: secondAccount })
-        const balanceAfter = await web3.eth.getBalance(secondAccount)
+        // buy tickets and get a refund for some of them
+        const balanceBefore = await balance.current(secondAccount)
+        const buyTx = await instance.buyTickets(0, ticketsToBuy, { from: secondAccount, value: ticketsToBuy.mul(ticketPrice) })
+        const refundTx = await instance.getRefund(0, ticketsToRefund, { from: secondAccount })
+        const balanceAfter = await balance.current(secondAccount)
 
-        // check event
+        // check event was logged
         expectEvent(
-          refundReceipt,
+          refundTx.receipt,
           TICKETS_REFUNDED_EVENT,
-          { buyer: secondAccount, eventId: '0', quantity: new BN(ticketsToBuy) })
+          { buyer: secondAccount, eventId: '0', quantity: ticketsToRefund })
 
+        // check number of tickets bought was correctly updated
+        assert.equal(
+          await instance.getBuyerTicketCount(0, { from: secondAccount }),
+          ticketsBought.toString(),
+          'quantity of tickets bought is incorrect'
+        )
 
-        // check balance
-        const buyTxCost = await getTxCost(buyReceipt)
-        const refundTxCost = await getTxCost(refundReceipt)
+        // check buyer was correctly refunded
+        const buyTxFee = await computeFee(buyTx.receipt)
+        const refundTxFee = await computeFee(refundTx.receipt)
+        const expectedBalance = balanceBefore.sub(buyTxFee).sub(refundTxFee).sub(ticketsBought.mul(ticketPrice))
 
         assert.equal(
-          balanceAfter,
-          balanceBefore - buyTxCost - refundTxCost,
+          balanceAfter.toString(),
+          expectedBalance.toString(),
           'buyer should be fully refunded when calling getRefund()')
       })
     })

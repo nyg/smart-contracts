@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: ISC
-pragma solidity 0.8.5;
+pragma solidity 0.8.6;
 
 /// @notice This contract allows the owner to create events for which a given number of tickets can be sold at a given
 /// price. It is possible for the owner to end the sale of tickets for an event and to receive the proceeds to the sale.
 /// It is also possible for a buyer to get his tickets refunded.
 contract EventTicket {
+
     /*
      * State variables
      */
@@ -178,8 +179,9 @@ contract EventTicket {
         events[eventId].buyers[msg.sender] += quantity;
         events[eventId].ticketSoldCount += quantity;
 
-        uint256 refundAmount =
-            msg.value - quantity * events[eventId].ticketPrice;
+        uint256 refundAmount = msg.value -
+            quantity *
+            events[eventId].ticketPrice;
         if (refundAmount > 0) {
             (bool refunded, ) = msg.sender.call{value: refundAmount}("");
             require(refunded, "Purchase refund failed");
@@ -193,10 +195,12 @@ contract EventTicket {
         external
         ticketsWereBought(eventId, quantity)
     {
+        events[eventId].buyers[msg.sender] -= quantity;
         events[eventId].ticketSoldCount -= quantity;
 
-        (bool refunded, ) =
-            msg.sender.call{value: quantity * events[eventId].ticketPrice}("");
+        (bool refunded, ) = msg.sender.call{
+            value: quantity * events[eventId].ticketPrice
+        }("");
         require(refunded, "Ticket refund failed");
 
         emit TicketsRefunded(msg.sender, eventId, quantity);
@@ -215,8 +219,8 @@ contract EventTicket {
     function endSale(uint256 eventId) external isOwner() isEventOpen(eventId) {
         events[eventId].isOpen = false;
 
-        uint256 eventProceeds =
-            events[eventId].ticketSoldCount * events[eventId].ticketPrice;
+        uint256 eventProceeds = events[eventId].ticketSoldCount *
+            events[eventId].ticketPrice;
         (bool transfered, ) = msg.sender.call{value: eventProceeds}("");
         require(transfered, "Proceeds transfer failed");
 
