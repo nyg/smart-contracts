@@ -9,10 +9,10 @@
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "0.5.12",
-    "@truffle/hdwallet-provider": "1.4.1",
-    "eslint": "7.31.0",
+    "@truffle/hdwallet-provider": "1.4.3",
+    "eslint": "7.32.0",
     "lite-server": "2.6.1",
     "solhint": "3.3.6",
-    "truffle": "5.4.1"
+    "truffle": "5.4.5"
   }
 }
