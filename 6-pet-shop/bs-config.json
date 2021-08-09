@@ -1,8 +1,7 @@
 {
   "server": {
     "baseDir": [
-      "./web",
-      "./build/contracts"
+      "./web"
     ]
   },
   "open": false,
