@@ -7,7 +7,7 @@ for dir in */ ; do
 	cd "$dir"
 	if [ -f package.json ] ; then
 		echo "\n\n==========================="
-		echo "== Updating dependencies of ${dir}…"
+		echo "== Updating dependencies of $dir"
 		echo "==========================="
 		ncu -u && npm install
 	fi
