@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf build/",
-    "dev": "lite-server"
+    "dev": "lite-server",
+    "compile": "npx truffle compile && cp build/contracts/*.json web/json"
   },
   "devDependencies": {
     "@openzeppelin/test-helpers": "0.5.12",
