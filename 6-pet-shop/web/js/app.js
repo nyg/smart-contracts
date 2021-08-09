@@ -1,3 +1,7 @@
+import * as PetShopUI from './petshop-ui.js'
+import * as BlockchainUI from './blockchain-ui.js'
+
+
 function App() {
 
   // Keccak-256 hash of `PetAdopted(uint256,address)'
@@ -111,7 +115,7 @@ function App() {
 
     // get the contract artifact which contains, among other things, the
     // contract ABI and the address where contract has been deployed
-    const artifact = await fetch('PetShop.json').then(resp => resp.json())
+    const artifact = await fetch('json/PetShop.json').then(resp => resp.json())
     this.PetShop = window.TruffleContract(artifact)
     console.info('Contract abstraction created.')
 
