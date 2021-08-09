@@ -56,5 +56,6 @@ Based on [ConsenSys-Academy/event-ticket-exercise](https://github.com/ConsenSys-
 
 This contract allows anyone to adopt a pet. A pet can only be adopted once and there are only 16 different pets. The purpose of this simple contract is to provide a simple dapp exemple for which a web interface can be written.
 
-Based on [trufflesuite.com/tutorial](https://www.trufflesuite.com/tutorial) and [truffle-box/pet-shop-box](https://github.com/truffle-box/pet-shop-box).
+Based on [trufflesuite.com/tutorial](https://www.trufflesuite.com/tutorial) and [truffle-box/pet-shop-box](https://github.com/truffle-box/pet-shop-box). [Demo on Github Pages](https://nyg.github.io/smart-contracts/6-pet-shop/web/), contract is deployed on Ropsten.
 
+## 7. Reentrancy Attack
