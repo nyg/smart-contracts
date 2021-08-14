@@ -22,6 +22,9 @@ contract PetShop {
     /// @notice A pet with the specified id has been adopted by its new owner.
     event PetAdopted(uint256 petId, address owner);
 
+    /// @notice The shop was reset, all adopters have been erased.
+    event PetShopReset();
+
     /*
      * Function modifiers
      */
@@ -72,6 +75,7 @@ contract PetShop {
     function reset() external {
         if (msg.sender == owner) {
             delete adopters;
+            emit PetShopReset();
         }
     }
 }

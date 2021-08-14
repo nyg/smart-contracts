@@ -4,6 +4,9 @@ import * as BlockchainUI from './blockchain-ui.js'
 
 function App() {
 
+  // Keccak-256 hash of `PetShopReset()'
+  const PET_SHOP_RESET_TOPIC = '0xb9f991b7129b11a1ff9b41bd33c85385232300cf531cfbaeae29f145ee9b3a7f'
+
   // Keccak-256 hash of `PetAdopted(uint256,address)'
   const PET_ADOPTED_TOPIC = '0xaa2d40dd3b943f6c2f61c88fa64ea4eb2b19ea7399bdf0f1351ef2ce22ff9db0'
 
@@ -165,15 +168,26 @@ function App() {
     }
 
     try {
-      const contractCreationReceipt = await getTransactionReceipt(this.PetShop.transactionHash)
-      const logs = await getLogs({
+      // get the block number of the contract creation
+      const contractCreationBlockNumber = (await getTransactionReceipt(this.PetShop.transactionHash)).blockNumber
+
+      // get the block number of the last PetShopReset event
+      const lastResetEventBlockNumber = (await getLogs({
         address: this.contract.address,
-        fromBlock: contractCreationReceipt.blockNumber,
+        fromBlock: contractCreationBlockNumber,
+        limit: 1,
+        topics: [PET_SHOP_RESET_TOPIC]
+      }))?.[0].blockNumber
+
+      // get all PetAdopted event since the contract creation or the last PetShopReset event
+      const petAdoptedEvents = await getLogs({
+        address: this.contract.address,
+        fromBlock: lastResetEventBlockNumber ?? contractCreationBlockNumber,
         topics: [PET_ADOPTED_TOPIC]
       })
 
       const receipts = await Promise.all(
-        logs.map(log => getTransactionReceipt(log.transactionHash)))
+        petAdoptedEvents.map(log => getTransactionReceipt(log.transactionHash)))
 
       receipts.forEach(receipt => {
         const petId = this.PetShop.decodeLogs(receipt.logs)[0].args.petId
@@ -289,10 +303,7 @@ function App() {
         method: 'eth_subscribe',
         params: ['logs', { address: this.contract.address, topics: [PET_ADOPTED_TOPIC] }]
       })
-      .then(id => {
-        console.log(`Adding subscription with id ${id} for handlePetAdoptedLog`)
-        addSubscription(id, handlePetAdoptedLog)
-      })
+      .then(id => addSubscription(id, handlePetAdoptedLog))
       .catch(error => {
         console.error(`Could not subscribe to contract logs due to error: [${error.code}] ${error.message}`)
       })
@@ -308,10 +319,7 @@ function App() {
   const subscribeToNewBlocks = () => {
     this.ethereum
       .request({ method: 'eth_subscribe', params: ['newHeads'] })
-      .then(id => {
-        console.log(`Adding subscription with id ${id} for handleNewBlock`)
-        addSubscription(id, handleNewBlock)
-      })
+      .then(id => addSubscription(id, handleNewBlock))
       .catch(BlockchainUI.setLastBlockError)
   }
 
