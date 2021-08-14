@@ -86,7 +86,7 @@ function App() {
       })
       .catch(error => {
         console.error(`Could not retrieve last block due to error: [${error.code}] ${error.message}`)
-        BlockchainUI.updateLastBlockError(error)
+        BlockchainUI.setLastBlockError(error)
       })
   }
 
@@ -104,10 +104,13 @@ function App() {
       })
       .catch(error => {
         console.error(`Could not retrieve chain id due to error: [${error.code}] ${error.message}`)
-        BlockchainUI.updateChainIdError(error)
+        BlockchainUI.setChainIdError(error)
       })
   }
 
+  /*
+  * Contract functions
+  */
 
   // Initialize the contract abstraction using the Truffle library (could be
   // done with another, e.g. ethers.js, web3.js).
@@ -129,7 +132,7 @@ function App() {
       BlockchainUI.updateContractAddress(this.contract.address)
       console.info(`Contract deployed at address ${this.contract.address}.`)
 
-      // subscribe to any future PetAdopted contract events
+      retrievePreviousPetAdoptedLogs()
       subscribeToPetAdoptedLogs()
 
       // retrieve adopted pets and refresh the UI
@@ -139,14 +142,51 @@ function App() {
       // the contract instance could not be created, most probably because
       // it hasn't been deployed on the current chain
       console.error(`Could not retrieve instance of deployed contract due to error: ${error.message}.`)
-      BlockchainUI.updateContractAddressError(error)
+      BlockchainUI.setContractAddressError(error)
       PetShopUI.disableButtons()
     }
   }
 
-  /*
-   * Contract functions
-   */
+
+  const retrievePreviousPetAdoptedLogs = async () => {
+
+    const getTransactionReceipt = async hash => {
+      return await this.ethereum.request({
+        method: 'eth_getTransactionReceipt',
+        params: [hash]
+      })
+    }
+
+    const getLogs = async filter => {
+      return await this.ethereum.request({
+        method: 'eth_getLogs',
+        params: [filter]
+      })
+    }
+
+    try {
+      const contractCreationReceipt = await getTransactionReceipt(this.PetShop.transactionHash)
+      const logs = await getLogs({
+        address: this.contract.address,
+        fromBlock: contractCreationReceipt.blockNumber,
+        topics: [PET_ADOPTED_TOPIC]
+      })
+
+      const receipts = await Promise.all(
+        logs.map(log => getTransactionReceipt(log.transactionHash)))
+
+      receipts.forEach(receipt => {
+        const petId = this.PetShop.decodeLogs(receipt.logs)[0].args.petId
+        const message = `Address ${receipt.from} adopted pet #${petId} in block #${parseInt(receipt.blockNumber)}`
+        console.dir(message)
+        BlockchainUI.addPreviousEvent(message)
+      })
+    }
+    catch (error) {
+      console.log(error)
+    }
+  }
+
 
   // Retrieve the array of adopters from the smart contract and update the UI.
   const refreshAdoptedPets = () => {
@@ -161,12 +201,19 @@ function App() {
 
   // Call the Adopt pet smart contract function when requested
   const adoptPetCallback = event => {
-    this.contract
-      .adopt(event.target.getAttribute('pet-id'), { from: this.account })
-      .then(refreshAdoptedPets)
-      .catch(error => {
-        console.error(`Could not adopt pet due to error: [${error.code}] ${error.message}`)
-      })
+
+    if (!this.account?.startsWith('0x')) {
+      // user is not logged in
+      PetShopUI.connectAccount()
+    }
+    else {
+      this.contract
+        .adopt(event.target.getAttribute('pet-id'), { from: this.account })
+        .then(refreshAdoptedPets)
+        .catch(error => {
+          console.error(`Could not adopt pet due to error: [${error.code}] ${error.message}`)
+        })
+    }
   }
 
   /*
@@ -182,7 +229,7 @@ function App() {
       .then(handleOnAccountsChangedEvent)
       .catch(error => {
         console.error(`Could not get user accounts due to error: [${error.code}] ${error.message}`)
-        BlockchainUI.updateAccountError()
+        BlockchainUI.setAccountError(error)
       })
   }
 
@@ -201,7 +248,7 @@ function App() {
       // nothing to do - handleOnAccountsChangedEvent will be executed
       .catch(error => {
         console.error(`Could not request access to accounts due to error: [${error.code}] ${error.message}`)
-        BlockchainUI.updateAccountError
+        BlockchainUI.setAccountError(error)
       })
       .finally(() => event.target.removeAttribute('disabled'))
   }
@@ -215,17 +262,16 @@ function App() {
   }
 
 
-  const handlePetAdoptedLog = log => {
+  const handlePetAdoptedLog = rawLog => {
 
-    // `log.data` corresponds to the values of the emitted event. Parsing this
-    // field is tied to the ABI.
-    // 2 is to remove the `0x', 64 is the number of hex chars for a 256-bit
-    // value. 40 is number of hex chars needed to encode an address.
-    const petId = parseInt(log.data.slice(2, 64 + 2))
-    const adopter = `0x${log.data.slice(64 + 2 + (64 - 40))}`
+    const log = this.PetShop.decodeLogs([rawLog])
 
-    const message = `Address ${adopter} adopted pet #${petId} in block ${parseInt(log.blockNumber)}`
-    BlockchainUI.addReceivedEvent(message)
+    const petId = log[0].args.petId
+    const adopter = log[0].address
+    const blockNumber = log[0].blockNumber
+
+    const message = `Address ${adopter} adopted pet #${petId} in block #${parseInt(blockNumber)}`
+    BlockchainUI.addLiveEvent(message)
     console.info(message)
 
     refreshAdoptedPets()
@@ -243,10 +289,12 @@ function App() {
         method: 'eth_subscribe',
         params: ['logs', { address: this.contract.address, topics: [PET_ADOPTED_TOPIC] }]
       })
-      .then(id => addSubscription(id, handlePetAdoptedLog))
+      .then(id => {
+        console.log(`Adding subscription with id ${id} for handlePetAdoptedLog`)
+        addSubscription(id, handlePetAdoptedLog)
+      })
       .catch(error => {
         console.error(`Could not subscribe to contract logs due to error: [${error.code}] ${error.message}`)
-        // TODO update ui
       })
   }
 
@@ -260,8 +308,11 @@ function App() {
   const subscribeToNewBlocks = () => {
     this.ethereum
       .request({ method: 'eth_subscribe', params: ['newHeads'] })
-      .then(id => addSubscription(id, handleNewBlock))
-      .catch(BlockchainUI.updateLastBlockError)
+      .then(id => {
+        console.log(`Adding subscription with id ${id} for handleNewBlock`)
+        addSubscription(id, handleNewBlock)
+      })
+      .catch(BlockchainUI.setLastBlockError)
   }
 
   /*

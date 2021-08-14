@@ -1,4 +1,5 @@
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+const connectButton = document.querySelector('.connect-button')
 
 
 // Disable all adopt buttons and reset text to 'Adopt'.
@@ -29,10 +30,15 @@ function updateButtons(adopters) {
 }
 
 
+function connectAccount() {
+  connectButton.click()
+}
+
+
 // Load pets from the JSON file and set up the UI.
 function init(adoptPetCallback, connectButtonCallback) {
 
-  document.querySelector('.connect-button').addEventListener('click', connectButtonCallback)
+  connectButton.addEventListener('click', connectButtonCallback)
 
   fetch('json/pets.json')
     .then(response => response.json())
@@ -53,4 +59,4 @@ function init(adoptPetCallback, connectButtonCallback) {
       }))
 }
 
-export { init, updateButtons, disableButtons }
+export { init, updateButtons, disableButtons, connectAccount }

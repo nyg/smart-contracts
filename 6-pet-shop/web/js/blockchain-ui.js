@@ -6,9 +6,8 @@ const tdChainId = document.querySelector('.chain-id')
 const tdSelectedAccount = document.querySelector('.selected-account')
 const tdContractAddress = document.querySelector('.contract-address')
 const tdLastBlock = document.querySelector('.last-block')
-const tdReceivedEvents = document.querySelector('.received-events')
-
-const connectStatusElement = document.querySelector('.ethereum-status')
+const tdPreviousEvents = document.querySelector('.previous-events')
+const tdLiveEvents = document.querySelector('.live-events')
 
 
 // Common network names
@@ -32,7 +31,7 @@ function updateChainId(chainId) {
   tdChainId.textContent = chainName[chainId] ?? `#${parseInt(chainId)}`
 }
 
-function updateChainIdError(error) {
+function setChainIdError(error) {
   tdChainId.textContent = error.message
 }
 
@@ -42,7 +41,7 @@ function updateLastBlock(block) {
   tdLastBlock.textContent = `${parseInt(block.number)} (${block.hash})`
 }
 
-function updateLastBlockError(error) {
+function setLastBlockError(error) {
   tdLastBlock.textContent = error.message
 }
 
@@ -52,7 +51,7 @@ function updateContractAddress(address) {
   tdContractAddress.textContent = address
 }
 
-function updateContractAddressError(error) {
+function setContractAddressError(error) {
   tdContractAddress.textContent = error.message
 }
 
@@ -62,26 +61,33 @@ function updateAccount(account) {
   tdSelectedAccount.textContent = account ?? 'No account selected'
 }
 
-function updateAccountError(error) {
+function setAccountError(error) {
   tdSelectedAccount.textContent = error.message
 }
 
-/* Received events */
+/* Events */
 
-function addReceivedEvent(event) {
-  tdReceivedEvents.appendChild(document.createTextNode(event))
-  tdReceivedEvents.appendChild(document.createElement('br'))
+function addPreviousEvent(message) {
+  tdPreviousEvents.appendChild(document.createTextNode(message))
+  tdPreviousEvents.appendChild(document.createElement('br'))
 }
+
+function addLiveEvent(message) {
+  tdLiveEvents.appendChild(document.createTextNode(message))
+  tdLiveEvents.appendChild(document.createElement('br'))
+}
+
 
 export {
   showBlockchainInfo,
   updateChainId,
-  updateChainIdError,
+  setChainIdError,
   updateLastBlock,
-  updateLastBlockError,
+  setLastBlockError,
   updateContractAddress,
-  updateContractAddressError,
+  setContractAddressError,
   updateAccount,
-  updateAccountError,
-  addReceivedEvent
+  setAccountError,
+  addPreviousEvent,
+  addLiveEvent
 }
