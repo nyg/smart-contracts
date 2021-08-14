@@ -6,7 +6,12 @@
 # install npm dependencies
 npm install
 
-# run web server for the PetShop contract
+# 3-simple-bank-vyper: create virtual env and install vyper
+python -m venv ./vyper-venv
+source ./vyper-venv/bin/activate
+pip install vyper
+
+# 6-pet-shot: run web server
 npm run dev
 
 # truffle commands
@@ -33,7 +38,7 @@ Based on [ConsenSys-Academy/multisig-wallet-exercise](https://github.com/ConsenS
 
 This contract acts as a simple bank, allowing users to enroll (i.e. create an account), to deposit and to withdraw funds.
 
-Based on [ConsenSys-Academy/simple-bank-exercise](https://github.com/ConsenSys-Academy/simple-bank-exercise).
+Based on [ConsenSys-Academy/simple-bank-exercise](https://github.com/ConsenSys-Academy/simple-bank-exercise) and [ConsenSys-Academy/simple-bank-vyper](https://github.com/ConsenSys-Academy/simple-bank-vyper).
 
 ## 4. Supply Chain
 
@@ -56,6 +61,6 @@ Based on [ConsenSys-Academy/event-ticket-exercise](https://github.com/ConsenSys-
 
 This contract allows anyone to adopt a pet. A pet can only be adopted once and there are only 16 different pets. The purpose of this simple contract is to provide a simple dapp exemple for which a web interface can be written.
 
-Based on [trufflesuite.com/tutorial](https://www.trufflesuite.com/tutorial) and [truffle-box/pet-shop-box](https://github.com/truffle-box/pet-shop-box). [Demo on Github Pages](https://nyg.github.io/smart-contracts/6-pet-shop/web/), contract is deployed on Ropsten.
+Based on [trufflesuite.com/tutorial](https://www.trufflesuite.com/tutorial) and [truffle-box/pet-shop-box](https://github.com/truffle-box/pet-shop-box). [Demo on Github Pages](https://nyg.github.io/smart-contracts/6-pet-shop/web/) (contract is deployed on Ropsten).
 
 ## 7. Reentrancy Attack
