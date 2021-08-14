@@ -281,7 +281,7 @@ function App() {
     const log = this.PetShop.decodeLogs([rawLog])
 
     const petId = log[0].args.petId
-    const adopter = log[0].address
+    const adopter = log[0].args.owner
     const blockNumber = log[0].blockNumber
 
     const message = `Address ${adopter} adopted pet #${petId} in block #${parseInt(blockNumber)}`
