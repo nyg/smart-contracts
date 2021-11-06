@@ -9,11 +9,11 @@
     "compile": "npx truffle compile && cp build/contracts/*.json web/json"
   },
   "devDependencies": {
-    "@openzeppelin/test-helpers": "0.5.12",
-    "@truffle/hdwallet-provider": "1.4.3",
-    "eslint": "7.32.0",
+    "@openzeppelin/test-helpers": "0.5.15",
+    "@truffle/hdwallet-provider": "1.6.0",
+    "eslint": "8.2.0",
     "lite-server": "2.6.1",
     "solhint": "3.3.6",
-    "truffle": "5.4.5"
+    "truffle": "5.4.18"
   }
 }
