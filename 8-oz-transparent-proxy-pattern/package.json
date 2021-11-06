@@ -4,7 +4,8 @@
   "main": "truffle-config.js",
   "license": "MIT",
   "scripts": {
-    "clean": "rm -rf build/"
+    "clean": "rm -rf build/ .openzeppelin/",
+    "test": "npx truffle test --migrate-none"
   },
   "devDependencies": {
     "@openzeppelin/contracts-upgradeable": "4.3.2",
