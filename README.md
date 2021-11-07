@@ -4,7 +4,13 @@
 
 ```shell
 # install npm dependencies
+cd x-name-of-project
 npm install
+
+# truffle commands
+npx truffle compile
+npx truffle test --migrate-none
+npx truffle migrate
 
 # 3-simple-bank-vyper: create virtual env and install vyper
 python -m venv ./vyper-venv
@@ -13,11 +19,6 @@ pip install vyper
 
 # 6-pet-shot: run web server
 npm run dev
-
-# truffle commands
-npx truffle test
-npx truffle compile
-npx truffle migrate
 ```
 
 ## 1. Proof of Existence
@@ -36,7 +37,7 @@ Based on [ConsenSys-Academy/multisig-wallet-exercise](https://github.com/ConsenS
 
 ## 3. Simple Bank
 
-This contract acts as a simple bank, allowing users to enroll (i.e. create an account), to deposit and to withdraw funds.
+This contract acts as a simple bank, allowing users to enroll (i.e. create an account), to deposit and to withdraw funds. Written in Solidity and [Vyper](https://vyper.readthedocs.io/en/latest/index.html).
 
 Based on [ConsenSys-Academy/simple-bank-exercise](https://github.com/ConsenSys-Academy/simple-bank-exercise) and [ConsenSys-Academy/simple-bank-vyper](https://github.com/ConsenSys-Academy/simple-bank-vyper).
 
@@ -64,3 +65,14 @@ This contract allows anyone to adopt a pet. A pet can only be adopted once and t
 Based on [trufflesuite.com/tutorial](https://www.trufflesuite.com/tutorial) and [truffle-box/pet-shop-box](https://github.com/truffle-box/pet-shop-box). [Demo on Github Pages](https://nyg.github.io/smart-contracts/6-pet-shop/web/) (contract is deployed on Ropsten).
 
 ## 7. Reentrancy Attack
+
+TODO
+
+## 8. Upgradeable Contract
+
+Example of an upgradeable contract (BoxV1 and BoxV2) using OpenZeppelin's [Upgrades](https://docs.openzeppelin.com/openzeppelin/upgrades) plugin and the [Transparent Proxy Pattern](https://blog.openzeppelin.com/the-transparent-proxy-pattern/).
+
+BoxV2 has a new storage variable as well as inherits from another contract (`PausableUpgradeable`). This poses a challenge as both of these changes will modify the storage layout. The solution used was to move the `Box` storage variables in a separate contract (`BoxStorage`) and have the `Box` contract inherit first from `BoxStorage` and then from other contracts. See comments and links in the code.
+
+More or less based on OpenZeppelin's [Upgrading smart contracts](https://docs.openzeppelin.com/learn/upgrading-smart-contracts).
+
