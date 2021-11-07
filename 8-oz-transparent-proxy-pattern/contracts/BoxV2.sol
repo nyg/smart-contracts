@@ -43,36 +43,32 @@ contract BoxV2 is
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
-    /// @dev We must take care to initialize all base contracts, and to
-    /// initialized them only once.
-    ///
-    /// Note that we could most probably delete this initializer in the V2.
-    function initializeV1(uint256 initialValue) public payable initializer {
-        // This call will first init the ContextUpgradeable contract (which is
-        // a base class of OwnableUpgradeable). It will then init itself.
-        //
-        // In our case there is no need to call the _unchained initializers
-        // because ContextUpgradeable is inherited only by OwnableUpgradeable
-        // and OwnableUpgradeable is inherited only this contract. Thus, we are
-        // sure all contracts are initialized only once.
-        //
-        // Initializable does not have any initializers.
-        __Ownable_init();
-
-        // Init the value of the box. Do not send an event.
-        value = initialValue;
-    }
-
     /// @dev We should not re-init what has already been init in the first
-    // version as the state (located in the proxy contract) is kept.
-    function initializeV2() public payable initializer {
-        // PausableUpgradeable also inherits from ContextUpgradeable so its
-        // initializer will be called twice, but as it's empty it's not an
-        // issue.
-        __Pausable_init();
+    /// version as the state (located in the proxy contract) is kept.
+    ///
+    /// Note that we cannot re-use the initializer modifier as it will fail.
+    /// Instead, we need to manually check for the value of `version' or
+    /// another (new) storage variable dedicated to this specific check.
+    ///
+    /// Also note that the initializeV1 function has been removed as it's not
+    /// needed anymore.
+    function initializeV2() public payable {
+        require(
+            keccak256(abi.encodePacked((version))) ==
+                keccak256(abi.encodePacked((""))),
+            "BoxV2: already initialized"
+        );
 
         // Init the new storage variable.
         version = "v2";
+
+        // As this contract now inherits from PausableUpgradeable we should
+        // initialize it. However, we cannot call __Pausable_init because the
+        // contract has already been initialized. Neither can we set _paused to
+        // false as the initializer is doing because the variable is internal.
+        // Actually, as booleans are initialized to false, there is nothing to
+        // initialize for PausableUpgradeable.
+        require(!paused(), "PausableUpgradeable not properly initialized");
     }
 
     /* Functions */
