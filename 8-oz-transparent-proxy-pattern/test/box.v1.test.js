@@ -6,6 +6,9 @@ const BoxV1 = artifacts.require('BoxV1')
 
 contract('BoxV1', accounts => {
 
+  const VALUE_CHANGED_EVENT = 'ValueChanged'
+  const OZ_ERR_OWNABLE_NOT_OWNER = 'Ownable: caller is not the owner'
+
   const owner = accounts[0]
   const notTheOwner = accounts[1]
 
@@ -34,7 +37,7 @@ contract('BoxV1', accounts => {
 
     expectEvent(
       await proxy.update(newValue, { from: owner }),
-      'ValueChanged',
+      VALUE_CHANGED_EVENT,
       { updater: owner, newValue: new BN(newValue) }
     )
 
@@ -45,21 +48,21 @@ contract('BoxV1', accounts => {
   it('should not allow someone to update its value', async () => {
     await expectRevert(
       proxy.update(24, { from: notTheOwner }),
-      'Ownable: caller is not the owner')
+      OZ_ERR_OWNABLE_NOT_OWNER)
   })
 
 
   it('should allow its value to be incremented', async () => {
 
     const currentValue = await proxy.value()
-    const incrementedValue = currentValue.add(new BN(1))
+    const newValue = currentValue.add(new BN(1))
 
     expectEvent(
       await proxy.increment({ from: notTheOwner }),
-      'ValueChanged',
-      { updater: notTheOwner, newValue: incrementedValue }
+      VALUE_CHANGED_EVENT,
+      { updater: notTheOwner, newValue }
     )
 
-    assert.equal(await proxy.value(), incrementedValue.toString(), 'contract should have new value set')
+    assert.equal(await proxy.value(), newValue.toString(), 'contract should have new value set')
   })
 })
