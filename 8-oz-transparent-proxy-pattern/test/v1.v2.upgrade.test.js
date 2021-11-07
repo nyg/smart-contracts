@@ -1,3 +1,4 @@
+const { ether, balance } = require('@openzeppelin/test-helpers')
 const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades')
 const { modifyOpenZeppelinNetworkFile } = require('./utils/storage-layout-hack')
 
@@ -19,7 +20,16 @@ contract('BoxV1 to BoxV2 upgrade', accounts => {
     await proxy.update(newValue, { from: owner })
     assert.equal(await proxy.value(), newValue, 'contract should have new value set')
 
-    // hack
+    // send some ether to the contract
+    const zeroOneEther = ether('0.1')
+    await proxy.send(zeroOneEther, { from: owner })
+
+    assert.equal(
+      await balance.current(proxy.address),
+      zeroOneEther.toString(),
+      'contract balance should be correct')
+
+    // hack to make upgrade possible
     modifyOpenZeppelinNetworkFile(BoxV1)
 
     // upgrade to v2
@@ -27,5 +37,11 @@ contract('BoxV1 to BoxV2 upgrade', accounts => {
 
     // check state value has been kept intact
     assert.equal(await proxy.value(), newValue, 'upgraded contract should have same value set')
+
+    // check the funds are still here
+    assert.equal(
+      await balance.current(proxy.address),
+      zeroOneEther.toString(),
+      'upgrade contract should have same balance')
   })
 })

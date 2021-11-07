@@ -94,4 +94,7 @@ contract BoxV2 is
     function unpause() external onlyOwner whenPaused {
         _unpause();
     }
+
+    /// @dev Allow contract to receive ethers.
+    receive() external payable {}
 }

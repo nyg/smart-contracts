@@ -11,7 +11,6 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 /// Note that this contract is not deployed anywhere but is simply integrated
 /// into the Box contract once it is compiled.
 contract BoxStorageV1 {
-
     /// @notice Public value of the box.
     uint256 public value;
 
@@ -64,4 +63,7 @@ contract BoxV1 is BoxStorageV1, Initializable, OwnableUpgradeable {
         value += 1;
         emit ValueChanged(msg.sender, value);
     }
+
+    /// @dev Allow contract to receive ethers.
+    receive() external payable {}
 }

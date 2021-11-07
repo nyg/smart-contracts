@@ -22,7 +22,7 @@ contract('BoxV2', accounts => {
     // deploy v1
     proxy = await deployProxy(BoxV1, [42], { initializer: 'initializeV1' })
 
-    // hack
+    // hack to make upgrade possible
     modifyOpenZeppelinNetworkFile(BoxV1)
 
     // upgrade to v2
