@@ -5,25 +5,22 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
-/// @dev Storage variables are extracted to another contract, which is then
-/// inherited by the Box contract. This ensures that the below storage
-/// variables are always placed first in the storage layout, allowing for
-/// future upgrades to inherit from additional contracts.
-///
-/// Note that this contract is not deployed anywhere but is simply integrated
-/// into the Box contract once it is compiled.
+/// @dev Note that this contract is not deployed anywhere but is simply
+/// integrated into the Box contract during compilation. Thus, there is no
+/// mechanism to upgrade it individually.
 contract BoxStorageV2 {
-    /// @notice Public value of the box.
+
+    /// @notice Value of the box.
     uint256 public value;
 
     /// @notice Version string of the Box contract.
     string public version;
 
-    /// @dev Lets us add additional storage variables in future upgrades.
+    /// @dev Gap for future storage variables.
     uint256[48] private gap;
 }
 
-/// @notice This new version adds a additional storage variable named `version'
+/// @notice This new version adds an additional storage variable named `version'
 /// and allows for the contract to be paused using OZ's PausableUpgradeable.
 contract BoxV2 is
     BoxStorageV2,
@@ -38,8 +35,7 @@ contract BoxV2 is
 
     /* Constructors & initializers */
 
-    /// @dev For security reasons, we should not leave our logic contract in an
-    /// uninitialized state.
+    /// @dev TODO
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -47,10 +43,10 @@ contract BoxV2 is
     /// version as the state (located in the proxy contract) is kept.
     ///
     /// Note that we cannot re-use the initializer modifier as it will fail.
-    /// Instead, we need to manually check for the value of `version' or
+    /// Instead, we need to manually check for the value of `version' or of
     /// another (new) storage variable dedicated to this specific check.
     ///
-    /// Also note that the initializeV1 function has been removed as it's not
+    /// Also note that the initializeV1 function has been removed as it is not
     /// needed anymore.
     function initializeV2() public payable {
         require(

@@ -4,22 +4,44 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-/// @dev Storage variables are extracted to another contract, which is then
-/// inherited by the Box contract. This ensures that the below storage
-/// variables are always placed first in the storage layout, allowing for
-/// future upgrades to inherit from additional contracts.
-/// Note that this contract is not deployed anywhere but is simply integrated
-/// into the Box contract once it is compiled.
+/// @dev Note that this contract is not deployed anywhere but is simply
+/// integrated into the Box contract during compilation. Thus, there is no
+/// mechanism to upgrade it individually.
 contract BoxStorageV1 {
-    /// @notice Public value of the box.
+
+    /// @notice Value of the box.
     uint256 public value;
 
-    /// @dev This gap lets us add additional storage variables in future
-    // updates.
+    /// @dev Gap for future storage variables.
     uint256[49] private gap;
 }
 
+/// @notice This contract holds a value which can be updated by the owner and
+/// incremented by anyone.
+///
+/// @dev The contract is upgradeable and follows the Transparent Proxy Pattern.
+/// In order to allow both the addition of storage variables and inherited
+/// contracts (which would modify the storage layout and render it incompatible
+/// with the previous version), two solutions have been used:
+///
+///   1. Move storage variables of BoxV1 in a separate BoxStorageV1 contract,
+///      which BoxV1 will use as its first inherited contract. This ensures
+///      that storage slots used by these variables do not depend on the other
+///      contracts BoxV1 will inherit from.
+///   2. However, this means the storage variables declared in the BoxStorageV1
+///      contract cannot be modified, as it would impact the slots used by
+///      variables declared in BoxV1 inherited contracts. To circumvent this
+///      problem, a gap of 49 storage slots is reserved using the gap variable
+///      in the BoxStorageV1 contract. Each time a variable needs to be added
+///      in BoxStorageV1, the size of the gap array should be reduced by one.
+///
+/// Note that OZ's Upgrades plugin checks if the next version of the contract
+/// maintains storage layout compatibility. It is however not yet capable of
+/// detecting the addition of a storage variable and the reducing of the array
+/// variable that follows it. Thus, to be able to perform the proxy upgrade, a
+/// small hack needs to be performed as explained in more details in the tests.
 contract BoxV1 is BoxStorageV1, Initializable, OwnableUpgradeable {
+
     /* Events */
 
     /// @notice Emitted when the value of the box is updated.
@@ -27,8 +49,7 @@ contract BoxV1 is BoxStorageV1, Initializable, OwnableUpgradeable {
 
     /* Constructors & initializers */
 
-    /// @dev For security reasons, we should not leave our logic contract in an
-    /// uninitialized state.
+    /// @dev TODO is this necessary?
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() initializer {}
 
@@ -44,6 +65,9 @@ contract BoxV1 is BoxStorageV1, Initializable, OwnableUpgradeable {
         // sure all contracts are initialized only once.
         //
         // Initializable does not have any initializers.
+        //
+        // The address delpoying the proxy will become the owner of this
+        // contract.
         __Ownable_init();
 
         // Init the value of the box. Do not send an event.
