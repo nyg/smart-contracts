@@ -2,7 +2,9 @@ const { hashBytecodeWithoutMetadata } = require('@openzeppelin/upgrades-core')
 const fs = require('fs')
 
 /*
- * Hack to bypass a limitation of OZ's storage layout compatibility verification, see:
+ * Hack to bypass a limitation of OZ's storage layout compatibility check.
+ *
+ * See:
  * - https://forum.openzeppelin.com/t/updating-inheritance-of-contract-during-contract-upgrade/17882/4
  * - https://forum.openzeppelin.com/t/storage-layout-upgrade-with-hardhat-upgrades/14567/2
  */
