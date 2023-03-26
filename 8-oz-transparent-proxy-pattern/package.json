@@ -9,13 +9,13 @@
     "test": "npx truffle test --migrate-none"
   },
   "devDependencies": {
-    "@openzeppelin/contracts-upgradeable": "4.4.2",
-    "@openzeppelin/test-helpers": "0.5.15",
-    "@openzeppelin/truffle-upgrades": "1.12.0",
-    "@truffle/hdwallet-provider": "2.0.0",
-    "eslint": "8.6.0",
-    "solhint": "3.3.6",
-    "truffle": "5.4.29",
-    "truffle-flattener": "1.5.0"
+    "@openzeppelin/contracts-upgradeable": "4.8.2",
+    "@openzeppelin/test-helpers": "0.5.16",
+    "@openzeppelin/truffle-upgrades": "1.17.1",
+    "@truffle/hdwallet-provider": "2.1.9",
+    "eslint": "8.36.0",
+    "solhint": "3.4.1",
+    "truffle": "5.8.1",
+    "truffle-flattener": "1.6.0"
   }
 }

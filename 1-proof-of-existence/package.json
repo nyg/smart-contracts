@@ -7,10 +7,10 @@
     "clean": "rm -rf build/"
   },
   "devDependencies": {
-    "@openzeppelin/test-helpers": "0.5.15",
-    "@truffle/hdwallet-provider": "2.0.0",
-    "eslint": "8.6.0",
-    "solhint": "3.3.6",
-    "truffle": "5.4.29"
+    "@openzeppelin/test-helpers": "0.5.16",
+    "@truffle/hdwallet-provider": "2.1.9",
+    "eslint": "8.36.0",
+    "solhint": "3.4.1",
+    "truffle": "5.8.1"
   }
 }
