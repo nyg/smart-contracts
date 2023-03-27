@@ -4,8 +4,7 @@
         "commonjs": true,
         "es6": true,
         "node": true,
-        "mocha": true,
-        "jquery": true
+        "mocha": true
     },
     "extends": "eslint:recommended",
     "globals": {
@@ -24,7 +23,7 @@
         "no-console": "off",
         "indent": [
             "error",
-            2,
+            3,
             {
                 "SwitchCase": 1
             }

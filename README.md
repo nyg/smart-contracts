@@ -5,12 +5,13 @@
 ```shell
 # install npm dependencies
 cd x-name-of-project
-npm install
+pnpm install
 
 # truffle commands
-npx truffle compile
-npx truffle test --migrate-none
-npx truffle migrate
+pnpm exec truffle develop # start local blockchain instance
+pnpm exec truffle compile # compile smart contracts
+pnpm exec truffle test --migrate-none # test smart contracts
+pnpm exec truffle migrate # deploy smart contracts
 
 # 3-simple-bank-vyper: create virtual env and install vyper
 python -m venv ./vyper-venv
@@ -18,7 +19,7 @@ source ./vyper-venv/bin/activate
 pip install vyper
 
 # 6-pet-shot: run web server
-npm run dev
+pnpm run dev
 ```
 
 ## 1. Proof of Existence
@@ -75,4 +76,3 @@ Example of an upgradeable contract (BoxV1 and BoxV2) using OpenZeppelin's [Upgra
 BoxV2 has a new storage variable as well as inherits from another contract (`PausableUpgradeable`). This poses a challenge as both of these changes will modify the storage layout. The solution used was to move the `Box` storage variables in a separate contract (`BoxStorage`) and have the `Box` contract inherit first from `BoxStorage` and then from other contracts. See comments and links in the code.
 
 More or less based on OpenZeppelin's [Upgrading smart contracts](https://docs.openzeppelin.com/learn/upgrading-smart-contracts).
-

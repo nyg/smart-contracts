@@ -6,3 +6,5 @@ node_modules
 .secret
 .openzeppelin
 .vscode
+artifacts
+cache
