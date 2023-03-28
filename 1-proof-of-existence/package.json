@@ -1,16 +1,18 @@
 {
   "name": "proof-of-existence",
   "version": "1.0.0",
-  "main": "truffle-config.js",
+  "main": "index.js",
   "license": "ISC",
   "scripts": {
-    "clean": "rm -rf build/"
+    "clean": "rm -rf build/",
+    "test": "pnpm exec hardhat test",
+    "compile": "pnpm exec hardhat compile",
+    "deploy": "pnpm exec hardhat run scripts/deploy.js"
   },
   "devDependencies": {
-    "@openzeppelin/test-helpers": "0.5.16",
-    "@truffle/hdwallet-provider": "2.1.9",
+    "@nomicfoundation/hardhat-toolbox": "2.0.2",
     "eslint": "8.36.0",
-    "solhint": "3.4.1",
-    "truffle": "5.8.1"
+    "hardhat": "2.13.0",
+    "solhint": "3.4.1"
   }
 }

@@ -1,33 +1,41 @@
-const { expectEvent, expectRevert } = require('@openzeppelin/test-helpers')
-const ProofOfExistence = artifacts.require('ProofOfExistence')
+const { ethers } = require('hardhat')
+const { expect } = require('chai')
+const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers')
+
+const document = 'Lorem ipsum'
 
 
-contract('ProofOfExistence', () => {
+describe('ProofOfExistence', () => {
 
-  const document = 'Lorem ipsum'
+   async function deployContractFixture() {
 
-  let instance
-  beforeEach(async () => {
-    instance = await ProofOfExistence.new()
-  })
+      const ProofOfExistence = await ethers.getContractFactory('ProofOfExistence')
+      const instance = await ProofOfExistence.deploy()
+      await instance.deployed()
 
-
-  it('should notarize a given document', async () => {
-
-    assert.isFalse(await instance.wasNotarized(document))
-
-    expectEvent(
-      await instance.notarize(document),
-      'DocumentNotarized',
-      { proof: web3.utils.soliditySha3(document) })
-
-    assert.isTrue(await instance.wasNotarized(document))
-  })
+      return { instance }
+   }
 
 
-  it('should not notarize an already notarized document', async () => {
-    await instance.notarize(document)
-    await expectRevert.unspecified(
-      instance.notarize(document))
-  })
+   it('should notarize a given document', async () => {
+
+      const { instance } = await loadFixture(deployContractFixture)
+
+      expect(await instance.wasNotarized(document)).to.be.false
+
+      await expect(instance.notarize(document))
+         .to.emit(instance, 'DocumentNotarized')
+         .withArgs(ethers.utils.solidityKeccak256(['string'], [document]))
+
+      expect(await instance.wasNotarized(document)).to.be.true
+   })
+
+
+   it('should not notarize an already notarized document', async () => {
+
+      const { instance } = await loadFixture(deployContractFixture)
+
+      await instance.notarize(document)
+      await expect(instance.notarize(document)).to.be.reverted
+   })
 })

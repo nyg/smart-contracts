@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: ISC
-pragma solidity 0.8.19;
+pragma solidity 0.8.18;
 
 /// @notice This contract allows for senders to notarize documents. A hash of the document is computed and then stored
 /// in the contract's state. Note that the content of the document is sent within the transaction to notarize it,
