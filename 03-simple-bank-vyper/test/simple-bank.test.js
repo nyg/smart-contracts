@@ -1,60 +1,104 @@
-const { expectEvent, ether } = require('@openzeppelin/test-helpers')
-const SimpleBank = artifacts.require('SimpleBank')
-
-contract('SimpleBank', async accounts => {
-
-  const owner = accounts[0]
-  const alice = accounts[1]
-  const bob = accounts[2]
-  const depositAmount = ether('0.1')
-
-  let instance
-  beforeEach(async () => {
-    instance = await SimpleBank.new({ from: owner })
-  })
+const { ethers } = require('hardhat')
+const { expect } = require('chai')
+const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers')
 
 
-  it('should set constructor value', async () => {
-    const actualOwner = await instance.contractOwner()
-    assert.strictEqual(actualOwner, owner)
-  })
+describe('SimpleBank', () => {
+
+   const ENROLLED_EVENT = 'Enrolled'
+   const DEPOSIT_MADE_EVENT = 'DepositMade'
+   const WITHDRAWAL_MADE_EVENT = 'WithdrawalMade'
+
+   const depositedAmount = ethers.utils.parseEther('2')
+
+   async function deployContractFixture() {
+
+      const ProofOfExistence = await ethers.getContractFactory('SimpleBank')
+      const [owner, alice] = await ethers.getSigners()
+
+      const instance = (await ProofOfExistence.deploy()).connect(alice)
+      await instance.deployed()
+
+      return { instance, owner, alice }
+   }
 
 
-  it('should mark addresses as enrolled', async () => {
+   it('should mark addresses as enrolled', async () => {
 
-    await instance.enroll({ from: alice })
+      const { instance, alice } = await loadFixture(deployContractFixture)
 
-    const aliceEnrolled = await instance.enrolledStatus(alice)
-    assert.equal(aliceEnrolled, true, 'Alice should be enrolled')
+      await expect(instance.enroll())
+         .to.emit(instance, ENROLLED_EVENT)
+         .withArgs(alice.address)
 
-    const ownerEnrolled = await instance.enrolledStatus(owner)
-    assert.equal(ownerEnrolled, false, 'Owner should not be enrolled')
-  })
-
-
-  it('should deposit correct amount', async () => {
-
-    await instance.enroll({ from: bob })
-
-    const receipt = await instance.deposit({ from: bob, value: depositAmount })
-    const balance = await instance.accountBalance({ from: bob })
-
-    assert.equal(balance, depositAmount.toString(), 'Bob\'s balance is incorrect')
-    expectEvent(receipt, 'DepositMade', { account: bob, amount: depositAmount })
-  })
+      expect(await instance.enrolledStatus(alice.address))
+         .to.be.true
+   })
 
 
-  it('should withdraw correct amount', async () => {
+   it('should not mark unenrolled users as enrolled', async () => {
+      const { instance, owner } = await loadFixture(deployContractFixture)
+      expect(await instance.enrolledStatus(owner.address)).to.be.false
+   })
 
-    const initialAmount = ether('0')
 
-    await instance.enroll({ from: alice })
-    await instance.deposit({ from: alice, value: depositAmount })
+   it('should deposit correct amount', async () => {
 
-    const receipt = await instance.withdraw(depositAmount, { from: alice })
-    const balance = await instance.accountBalance({ from: alice })
+      const { instance } = await loadFixture(deployContractFixture)
 
-    assert.equal(balance.toString(), initialAmount.toString(), 'New balance is incorrect')
-    expectEvent(receipt, 'WithdrawalMade', { account: alice, newBalance: initialAmount, amount: depositAmount })
-  })
+      await instance.enroll()
+      await instance.deposit({ value: depositedAmount })
+
+      expect(await instance.accountBalance())
+         .to.equal(depositedAmount)
+   })
+
+
+   it('should log a deposit event when a deposit is made', async () => {
+
+      const { instance, alice } = await loadFixture(deployContractFixture)
+
+      await instance.enroll()
+
+      await expect(instance.deposit({ value: depositedAmount }))
+         .to.emit(instance, DEPOSIT_MADE_EVENT)
+         .withArgs(alice.address, depositedAmount)
+   })
+
+
+   it('should withdraw correct amount', async () => {
+
+      const { instance } = await loadFixture(deployContractFixture)
+
+      await instance.enroll()
+      await instance.deposit({ value: depositedAmount })
+      await instance.withdraw(depositedAmount)
+
+      expect(await instance.accountBalance()).to.equal(0)
+   })
+
+
+   it('should not be able to withdraw more than has been deposited', async () => {
+
+      const { instance } = await loadFixture(deployContractFixture)
+
+      await instance.enroll()
+      await instance.deposit({ value: depositedAmount })
+
+      await expect(instance.withdraw(depositedAmount.add(1)))
+         .to.be.revertedWith('withdrawal amount greater than balance')
+   })
+
+
+   it('should emit the appropriate event when a withdrawal is made', async () => {
+
+      const { instance, alice } = await loadFixture(deployContractFixture)
+
+      await instance.enroll()
+      await instance.deposit({ value: depositedAmount })
+
+      await expect(instance.withdraw(depositedAmount))
+         .to.emit(instance, WITHDRAWAL_MADE_EVENT)
+         .withArgs(alice.address, depositedAmount, 0)
+   })
 })

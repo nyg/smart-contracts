@@ -1,7 +1,7 @@
 #
 # Events
 
-event ClientEnrolled:
+event Enrolled:
     account: indexed(address)
 
 event DepositMade:
@@ -46,7 +46,7 @@ def enroll() -> bool:
     assert not self.enrolledStatus[msg.sender], 'sender is already enrolled'
 
     self.enrolledStatus[msg.sender] = True
-    log ClientEnrolled(msg.sender)
+    log Enrolled(msg.sender)
 
     return True
 
