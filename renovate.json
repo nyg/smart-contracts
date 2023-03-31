@@ -1,0 +1,10 @@
+{
+   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+   "extends": [
+      "github>nyg/renovate-presets"
+   ],
+   "dependencyDashboardApproval": true,
+   "vulnerabilityAlerts": {
+      "dependencyDashboardApproval": true
+   }
+}
