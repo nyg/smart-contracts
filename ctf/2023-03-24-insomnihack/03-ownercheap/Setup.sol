@@ -7,7 +7,7 @@ contract Setup {
     Challenge public chall;
 
     constructor() payable {
-        require(msg.value >= 100, "Not enough ETH to create the challenge..");
+        require(msg.value >= 100, "Not enough ETH to create the challenge...");
         chall = (new Challenge){value: 50 ether}();
     }
 
