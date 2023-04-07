@@ -64,3 +64,9 @@ nav:
   - Home:
     - Welcome: index.md
     - Tags: tags.md
+  - Writeups:
+    - Insomni'hack 2023:
+      - writeups/intro2solidity.md
+      - writeups/ownercheap.md
+      - writeups/notsuchsolidit.md
+      - writeups/blockchainindev.md
