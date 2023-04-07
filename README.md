@@ -1,5 +1,7 @@
 # Smart Contracts
 
+Published at: [blockchain.andstuff.club](https://blockchain.andstuff.club/).
+
 ## Commands
 
 ```shell

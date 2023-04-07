@@ -1,0 +1,53 @@
+/* Fix list margins */
+
+.md-typeset ol li,
+.md-typeset ul li {
+    margin-bottom: 0;
+}
+
+.md-typeset ol li ol,
+.md-typeset ol li ul,
+.md-typeset ul li ol,
+.md-typeset ul li ul {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.md-typeset blockquote, .md-typeset dl, .md-typeset figure, .md-typeset ol, .md-typeset pre, .md-typeset ul {
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
+
+/* Style for tags and source file information which are under the page title */
+
+.md-typeset h1 {
+    margin: 0 0 0.5em;
+}
+
+.md-tags-source-file-container {
+    display: flex;
+    justify-content: flex-end;
+    border-top: .05rem solid var(--md-default-fg-color--lightest);
+    border-bottom: .05rem solid var(--md-default-fg-color--lightest);
+    margin: 0 0 2em;
+    padding: 0.75em 0 0.75em;
+}
+
+.md-source-file {
+    margin: 0;
+}
+
+.md-typeset .md-tags {
+    flex-grow: 2;
+    margin: 0;
+}
+
+.md-typeset .md-tag {
+    margin: 0;
+}
+
+/* Fix font color for nav sections */
+
+.md-nav__item--section>.md-nav__link[for] {
+    color: var(--md-default-fg-color--dark)
+}
