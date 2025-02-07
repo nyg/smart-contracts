@@ -1,3 +1,8 @@
-# Tags
+---
+title: Tags
+hide:
+  - navigation
+  - toc
+---
 
-[TAGS]
+<!-- material/tags -->

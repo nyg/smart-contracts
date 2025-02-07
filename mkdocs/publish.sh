@@ -7,6 +7,7 @@ echo_section() {
 }
 
 echo_section Building website…
+rm -r site
 mkdocs build
 
 echo_section Creating archive…

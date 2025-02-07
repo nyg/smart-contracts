@@ -21,7 +21,6 @@ markdown_extensions:
 plugins:
   - search
   - tags:
-      tags_file: tags.md
   - git-revision-date-localized:
       enable_creation_date: true
       type: custom
@@ -33,7 +32,7 @@ plugins:
 theme:
   name: material
   custom_dir: overrides
-  language: custom
+  language: en
   features:
     #- navigation.instant
     - navigation.tracking
@@ -70,3 +69,5 @@ nav:
       - writeups/ownercheap.md
       - writeups/notsuchsolidit.md
       - writeups/blockchainindev.md
+  - Misc:
+    - misc/nft.md

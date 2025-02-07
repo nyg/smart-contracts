@@ -1,53 +1,97 @@
-/* Fix list margins */
+/* Font settings */
+
+@media screen and (min-width: 125em) { /* Reduce font-size */
+    html { font-size: 137.5%; }
+}
+
+@media screen and (min-width: 100em) {  /* Reduce font-size */
+    html { font-size: 125%; }
+}
+
+body { /* Remove font-smoothing */
+    -webkit-font-smoothing: unset;
+    -moz-osx-font-smoothing: unset;
+}
+
+:root,[data-md-color-scheme=default] { /* Remove transparency */
+    --md-default-fg-color: rgb(31, 35, 40);
+    --md-code-fg-color: rgb(31, 35, 40);
+}
+
+.md-typeset h2 { /* Increase font-weight */
+    font-weight: 450;
+}
+
+.md-typeset code { /* Increase border-radius and padding */
+    border-radius: .2em;
+    padding: .2em .4em;
+}
+
+.md-nav__item--section>.md-nav__link[for] { /* Fix font color for nav sections */
+    color: var(--md-default-fg-color--dark)
+}
+
+/* Layout */
+
+.md-grid { /* Increase body width */
+    max-width: 66rem;
+}
+
+.md-sidebar { /* Increase sidebar width */
+    width: 14rem;
+}
+
+@supports selector(::-webkit-scrollbar) {
+    [dir=ltr] .md-sidebar__inner { /* Remove padding on the right */
+        padding-right: 0;
+    }
+}
+
+/* Lists */
+
+.md-typeset li { /* Increase spacing with number/symbol */
+    padding-left: 0.5em;
+}
 
 .md-typeset ol li,
-.md-typeset ul li {
-    margin-bottom: 0;
+.md-typeset ul li { /* Reduce margin between list items */
+    margin: .1em 0 .1em;
+}
+
+.md-typeset ol li blockquote,
+.md-typeset ol li p,
+.md-typeset ul li blockquote,
+.md-typeset ul li p { /* Remove margin top and bottom */
+    margin: 0;
 }
 
 .md-typeset ol li ol,
 .md-typeset ol li ul,
 .md-typeset ul li ol,
-.md-typeset ul li ul {
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-.md-typeset blockquote, .md-typeset dl, .md-typeset figure, .md-typeset ol, .md-typeset pre, .md-typeset ul {
-    margin-top: 0.25em;
-    margin-bottom: 0.25em;
+.md-typeset ul li ul { /* Remove margin top and bottom */
+    margin: 0;
 }
 
 /* Style for tags and source file information which are under the page title */
 
 .md-typeset h1 {
-    margin: 0 0 0.5em;
+    margin: 0 0 0.2em;
 }
 
 .md-tags-source-file-container {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
     border-top: .05rem solid var(--md-default-fg-color--lightest);
     border-bottom: .05rem solid var(--md-default-fg-color--lightest);
-    margin: 0 0 2em;
-    padding: 0.75em 0 0.75em;
+    margin: 1em 0 2em;
+    padding: 0.6em 0 0.6em;
 }
 
 .md-source-file {
     margin: 0;
 }
 
-.md-typeset .md-tags {
+.md-typeset .md-tags:not([hidden]) {
     flex-grow: 2;
     margin: 0;
-}
-
-.md-typeset .md-tag {
-    margin: 0;
-}
-
-/* Fix font color for nav sections */
-
-.md-nav__item--section>.md-nav__link[for] {
-    color: var(--md-default-fg-color--dark)
 }
