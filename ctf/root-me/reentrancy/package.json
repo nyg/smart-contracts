@@ -1,0 +1,16 @@
+{
+   "name": "reentrancy",
+   "version": "1.0.0",
+   "scripts": {
+      "node": "pnpm exec hardhat node",
+      "test": "pnpm exec hardhat test",
+      "deploy": "pnpm exec hardhat run scripts/deploy.js --network localhost"
+   },
+   "author": "nyg",
+   "license": "MIT",
+   "devDependencies": {
+      "@nomicfoundation/hardhat-toolbox": "2.0.2",
+      "eslint": "8.37.0",
+      "hardhat": "2.13.0"
+   }
+}

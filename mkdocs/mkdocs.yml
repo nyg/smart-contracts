@@ -68,5 +68,7 @@ nav:
       - writeups/ownercheap.md
       - writeups/notsuchsolidit.md
       - writeups/blockchainindev.md
+    - Root Me:
+      - writeups/reentrancy.md
   - Misc:
     - misc/nft.md
