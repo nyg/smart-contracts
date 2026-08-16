@@ -2,6 +2,7 @@
    "name": "01-intro2solidity",
    "version": "1.0.0",
    "scripts": {
+      "node": "pnpm exec hardhat node",
       "deploy": "pnpm exec hardhat run scripts/deploy.js --network localhost",
       "attack": "pnpm exec hardhat run scripts/attack.js"
    },

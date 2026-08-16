@@ -6,12 +6,12 @@ async function main() {
    console.log('Using network:', await ethers.provider.getNetwork())
    console.log('Deployer:', deployer.address)
 
-   // Deploy the Setup contract
+   // Deploy the Setup contract with 100 ETH
    const Setup = await ethers.getContractFactory('Setup')
    const setupInstance = await Setup.deploy({ value: ethers.utils.parseEther('100') })
    await setupInstance.deployed()
 
-   // Fund the EOA
+   // Fund the EOA that is given to the attacker
    await deployer.sendTransaction({
       to: '0x133756e1688E475c401d1569565e8E16E65B1337',
       value: ethers.utils.parseEther('1')
